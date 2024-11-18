@@ -1,5 +1,4 @@
-# Introduction
-We chose this topic because adolescent health behaviors, such as physical 
+# Introduction : We chose this topic because adolescent health behaviors, such as physical 
 activity, sleep patterns, and dietary habits, are critical determinants of 
 long-term health outcomes. Understanding these behaviors provides valuable 
 insights into the factors influencing the well-being of young people, who are 
