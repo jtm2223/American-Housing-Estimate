@@ -4,9 +4,9 @@
     "href": "index.html",
     "title": "Analysis of Youth Risk Behavior",
     "section": "",
-    "text": "1 Introduction",
+    "text": "1 Introduction :\nWe chose this topic because adolescent health behaviors, such as physical activity, sleep patterns, and dietary habits, are critical determinants of long-term health outcomes. Understanding these behaviors provides valuable insights into the factors influencing the well-being of young people, who are at a formative stage of life. By analyzing the Youth Risk Behavior Surveillance System (YRBSS) dataset, I aim to investigate questions such as: How do physical activity levels vary by age and grade? Are there significant disparities in sleep patterns across demographic groups? What is the relationship between screen time and physical activity levels? This analysis can help identify areas for targeted health interventions and inform policies to promote healthier lifestyles among adolescents, particularly for those who may be at higher risk of adverse health outcomes. For readers unfamiliar with the topic, the YRBSS is a national survey that monitors health-risk behaviors among youth, offering a comprehensive dataset for exploring these crucial questions.",
     "crumbs": [
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction :</span>"
     ]
   },
   {
