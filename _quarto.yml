@@ -6,12 +6,12 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Analysis of Youth Risk Behavior"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
-  date: today
+    - Justin Mathew (JTM2223)
+    - Aditiya Vurukala (AV3244)
+  repo-url: https://github.com/jtm2223/Youth-Risk-Behavior
+  date: 11/18/2024
   page-footer:
     right: |
       This book was built with <a href="https://quarto.org/">Quarto</a>.
