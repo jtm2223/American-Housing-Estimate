@@ -14,7 +14,7 @@
     "href": "data.html",
     "title": "2  Data",
     "section": "",
-    "text": "2.1 Description",
+    "text": "2.1 Description\nThe dataset originates from the Youth Risk Behavior Surveillance System (YRBSS), conducted by the Centers for Disease Control and Prevention (CDC). The data is in CSV format and contains health-related variables such as physical activity, sleep hours, and screen time. The dataset has approximately 13,500 rows and multiple variables (age, grade, gender, etc.). It was imported into R using the read.csv() function. Some columns contain missing values, which will require cleaning or imputation. The dataset is publicly available on the CDC’s website at YRBSS Data. ## Missing value analysis",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
     ]
