@@ -9,4 +9,30 @@ multiple variables (age, grade, gender, etc.). It was imported into R using
 the read.csv() function. Some columns contain missing values, which will require
 cleaning or imputation. The dataset is publicly available on the CDC's website 
 at YRBSS Data.
+
 ## Missing value analysis
+```{r}
+library(tidyverse)  
+library(naniar)   
+
+data <- read.csv("yrbss.csv", stringsAsFactors = FALSE)
+
+missing_values <- colSums(is.na(data))
+print("Missing Values Per Column:")
+print(missing_values)
+
+gg_miss_var(data) + 
+  labs(title = "Missing Values Per Column", x = "Variables", y = "Number of Missing Values")
+
+gg_miss_upset(data)
+
+missing_df <- as.data.frame(missing_values[missing_values > 0], stringsAsFactors = FALSE) %>%
+  rownames_to_column(var = "Variable") %>%
+  rename(MissingCount = `missing_values[missing_values > 0]`)
+
+ggplot(missing_df, aes(x = reorder(Variable, -MissingCount), y = MissingCount)) +
+  geom_bar(stat = "identity", fill = "orange", color = "black") +
+  labs(title = "Number of Missing Values Per Column", x = "Variable", y = "Count") +
+  theme_minimal() +
+  coord_flip()
+```
