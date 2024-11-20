@@ -1,2 +1,15 @@
 # Introduction : 
-For this project, we chose to explore housing estimates across U.S. counties using data from the American Community Survey (ACS). This topic is particularly relevant given the ongoing challenges surrounding housing affordability, availability, and demographic shifts in the United States. The dataset offers an opportunity to analyze trends in housing occupancy, vacancy rates, and housing costs. Key questions include: How do housing availability and affordability vary across different regions and income levels? Are there patterns in housing disparities that align with socioeconomic or geographic factors? By addressing these questions, this project aims to provide insights into the factors driving housing trends and inform potential policy interventions to address housing inequalities. This context ensures that even readers unfamiliar with housing datasets can appreciate the relevance and significance of the analysis.
+For this project, we chose to explore housing estimates across the United 
+States. This topic resonates with us personally as we transition into living 
+independently and managing housing expenses ourselves. We found it compelling to
+analyze how housing prices have been changing over recent times and to identify 
+the key factors driving these changes. In addition, this topic is particularly 
+relevant given the ongoing challenges surrounding housing affordability, 
+availability, and demographic shifts in the United States. Key questions we 
+would like to address are: How do housing availability and affordability vary 
+across different regions and income levels? Are there patterns in housing 
+disparities that align with socioeconomic or geographic factors? Are there 
+specific features/traits of housing that are key in determining prcing and are 
+these the same factors that were important before? By addressing these 
+questions, we aim to provide insights into the factors driving housing trends 
+and inform potential policy interventions to address housing inequalities.

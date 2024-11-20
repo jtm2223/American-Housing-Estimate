@@ -1,7 +1,20 @@
 # Data
 
 ## Description
-The dataset used for this analysis is sourced from the American Community Survey (ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. Census Bureau, which conducts comprehensive surveys to assess housing characteristics across counties in the United States. The dataset is provided in a CSV format and includes over 240 columns with variables such as total housing units, occupancy rates, and housing costs. These variables are measured and updated annually, with detailed geographic identifiers for each county. The data is well-documented, and the source is reliable for understanding housing trends at a granular level. To import the data, I used standard data manipulation tools (e.g., Python's pandas library). Some challenges include the large number of columns and potential for missing values, which require preprocessing for effective analysis. The dataset can be accessed directly from the U.S. Census Bureau's data repository.
+(ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. 
+Census Bureau, which conducts comprehensive surveys to assess housing 
+characteristics across counties in the United States and the specific dataset we 
+are using is for the years 2016-2020. The dataset is provided in a CSV format and 
+includes over 240 columns with variables such as total housing units, occupancy 
+rates, and housing costs. These variables are measured and updated annually, 
+with detailed geographic identifiers for each county. The data is 
+well-documented, and the source is reliable for understanding housing trends at 
+a granular level. To import the data, I used standard data manipulation tools. 
+Some challenges include the large number of columns and potential for missing 
+values, which require preprocessing for effective analysis. Additionally, the 
+original column names in the dataset are not clear and understandable so we need 
+to rename the columns for clarity. The dataset can be accessed directly from the 
+U.S. Census Bureau's data repository.
 
 ## Missing value analysis
 ```{r}
@@ -10,7 +23,6 @@ library(naniar)
 file_path <- "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
 housing_data <- read.csv(file_path)
 
-# Rename specified columns explicitly
 filtered_data <- housing_data %>%
   rename(
     Occupancy_Status = B25002EST1,
@@ -29,7 +41,6 @@ filtered_data <- housing_data %>%
     Tenure_By_Selected_Physical_And_Financial_Conditions = B25123_TOT
   )
 
-# Keep only the renamed columns and the original identifiers
 columns_to_keep <- c(
   "Occupancy_Status",
   "Tenure_By_Household_Size",
@@ -51,7 +62,6 @@ columns_to_keep <- c(
 filtered_data <- filtered_data %>%
   select(all_of(columns_to_keep))
 
-# Print renamed and filtered columns for verification
 print("Renamed and Filtered Columns:")
 print(colnames(filtered_data))
 ```
@@ -62,27 +72,21 @@ missing_summary <- filtered_data %>%
   pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
   arrange(desc(MissingCount))
 
-# Print missing value summary
 print("Missing Values Summary:")
 print(missing_summary)
 
-# Calculate Missing Value Percentages
 missing_summary <- missing_summary %>%
   mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
 
-# Print missing percentages
 print("Missing Values Percentage:")
 print(missing_summary)
 
-# Visualize Missing Values
-# Heatmap of Missingness
 row_missing_summary <- filtered_data %>%
   mutate(MissingCount = rowSums(is.na(.))) %>%
   group_by(MissingCount) %>%
   summarize(Count = n()) %>%
   arrange(MissingCount)
 
-# Plot the Improved Distribution
 ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
   geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
   geom_text(aes(label = Count), vjust = -0.3, size = 4) +
@@ -101,21 +105,42 @@ ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
     plot.subtitle = element_text(hjust = 0.5, size = 12)
   )
 
+```
+This graph provides an overview of missing data across rows, illustrating how 
+many rows have varying levels of missing values. It reveals that the dataset is 
+mostly complete, with 3,206 rows containing no missing  values. Only 13 rows 
+have one missing value, and 2 rows have only two missing  values. This low 
+level of missing values indicates that removing rows with missing data 
+would not significantly reduce the dataset's size or quality, making it an 
+ideal candidate for robust analysis.
+
+```{r fig.width=10, fig.height=8}
+library(stringr)  
+
 ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
   geom_bar(stat = "identity", fill = "steelblue", color = "black") +
-  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), hjust = -0.1, size = 3.5) +
+  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), 
+            hjust = -0.2, size = 3.5) +
   coord_flip() +
   labs(
     title = "Percentage of Missing Values by Column",
-    subtitle = "Highlighting the extent of missing data in each variable",
+    subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),
     x = "Columns",
     y = "Percentage Missing"
   ) +
-  theme_minimal(base_size = 12) +
+  scale_y_continuous(breaks = seq(0, 0.5, by = 0.05)) +
+  theme_minimal(base_size = 14) +
   theme(
-    axis.text.y = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, size = 14),
-    plot.subtitle = element_text(hjust = 0.5, size = 12)
+    axis.text.y = element_text(size = 6, angle = 45, hjust = 1),
+    axis.text.x = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 14),
+    plot.margin = margin(60, 20, 40, 20)
   )
-```
 
+ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
+```
+This graph shows tha the majority of the columns are fully complete, with no 
+missing values at all. "Median_Contract_Rent" is one of the few columns with a 
+small percentage of missing data (0.2%). Overall the dataset is highly reliable 
+overall, with minimal data loss.
