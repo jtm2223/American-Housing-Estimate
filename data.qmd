@@ -106,10 +106,10 @@ ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
   )
 
 ```
-This graph provides an overview of missing data across rows, illustrating how 
-many rows have varying levels of missing values. It reveals that the dataset is 
-mostly complete, with 3,206 rows containing no missing  values. Only 13 rows 
-have one missing value, and 2 rows have only two missing  values. This low 
+This bar plot provides an overview of missing data across rows, illustrating how 
+many rows have varying levels of missing values. It reveals that the data set is 
+mostly complete, with 3,206 rows containing no missing values. Only 13 rows 
+have one missing value, and 2 rows have only two missing values. This low 
 level of missing values indicates that removing rows with missing data 
 would not significantly reduce the dataset's size or quality, making it an 
 ideal candidate for robust analysis.
@@ -140,7 +140,6 @@ ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = Missing
 
 ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
 ```
-This graph shows tha the majority of the columns are fully complete, with no 
-missing values at all. "Median_Contract_Rent" is one of the few columns with a 
-small percentage of missing data (0.2%). Overall the dataset is highly reliable 
-overall, with minimal data loss.
+This graph complements the previous graphic as it shows the columns with 
+missing values. The one difference is this one shows the missing values per column as a 
+percentage of total rows. It reveals that only two columns have a significant amount of missing values. Those two columns are the the Mortgage_Status_By_Median_Value and the "Median_Contract_Rent". Overall the data set is highly reliable with minimal data loss.
