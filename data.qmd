@@ -1,38 +1,121 @@
 # Data
 
 ## Description
-The dataset originates from the Youth Risk Behavior Surveillance System (YRBSS),
-conducted by the Centers for Disease Control and Prevention (CDC). The data is 
-in CSV format and contains health-related variables such as physical activity, 
-sleep hours, and screen time. The dataset has approximately 13,500 rows and 
-multiple variables (age, grade, gender, etc.). It was imported into R using 
-the read.csv() function. Some columns contain missing values, which will require
-cleaning or imputation. The dataset is publicly available on the CDC's website 
-at YRBSS Data.
+The dataset used for this analysis is sourced from the American Community Survey (ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. Census Bureau, which conducts comprehensive surveys to assess housing characteristics across counties in the United States. The dataset is provided in a CSV format and includes over 240 columns with variables such as total housing units, occupancy rates, and housing costs. These variables are measured and updated annually, with detailed geographic identifiers for each county. The data is well-documented, and the source is reliable for understanding housing trends at a granular level. To import the data, I used standard data manipulation tools (e.g., Python's pandas library). Some challenges include the large number of columns and potential for missing values, which require preprocessing for effective analysis. The dataset can be accessed directly from the U.S. Census Bureau's data repository.
 
 ## Missing value analysis
 ```{r}
 library(tidyverse)  
-library(naniar)   
+library(naniar) 
+file_path <- "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
+housing_data <- read.csv(file_path)
 
-data <- read.csv("yrbss.csv", stringsAsFactors = FALSE)
+# Rename specified columns explicitly
+filtered_data <- housing_data %>%
+  rename(
+    Occupancy_Status = B25002EST1,
+    Tenure_By_Household_Size = B25009EST2,
+    Median_Number_Of_Rooms_By_Tenure = B25021EST1,
+    Units_In_Structure = B25024EST2,
+    Tenure_By_Units_In_Structure = B25032EST2,
+    Tenure_By_Year_Structure_Built = B25036_OWN_80TO99,
+    Median_Year_Structure_Built_By_Tenure = B25037EST3,
+    Bedrooms = B25041EST2,
+    Tenure_By_Bedrooms = B25042EST3,
+    Contract_Rent = B25056_500TO599,
+    Median_Contract_Rent = B25058EST1,
+    Bedrooms_By_Gross_Rent = B25068EST2,
+    Mortgage_Status_By_Median_Value = B25097EST1,
+    Tenure_By_Selected_Physical_And_Financial_Conditions = B25123_TOT
+  )
 
-missing_values <- colSums(is.na(data))
-print("Missing Values Per Column:")
-print(missing_values)
+# Keep only the renamed columns and the original identifiers
+columns_to_keep <- c(
+  "Occupancy_Status",
+  "Tenure_By_Household_Size",
+  "Median_Number_Of_Rooms_By_Tenure",
+  "Units_In_Structure",
+  "Tenure_By_Units_In_Structure",
+  "Tenure_By_Year_Structure_Built",
+  "Median_Year_Structure_Built_By_Tenure",
+  "Bedrooms",
+  "Tenure_By_Bedrooms",
+  "Contract_Rent",
+  "Median_Contract_Rent",
+  "Bedrooms_By_Gross_Rent",
+  "Mortgage_Status_By_Median_Value",
+  "Tenure_By_Selected_Physical_And_Financial_Conditions",
+  "OBJECTID_1", "GEOID", "STATE", "STUSAB", "STATE_NAME", "COUNTY", "NAME"
+)
 
-gg_miss_var(data) + 
-  labs(title = "Missing Values Per Column", x = "Variables", y = "Number of Missing Values")
+filtered_data <- filtered_data %>%
+  select(all_of(columns_to_keep))
 
-gg_miss_upset(data)
-
-missing_df <- as.data.frame(missing_values[missing_values > 0], stringsAsFactors = FALSE) %>%
-  rownames_to_column(var = "Variable") %>%
-  rename(MissingCount = `missing_values[missing_values > 0]`)
-
-ggplot(missing_df, aes(x = reorder(Variable, -MissingCount), y = MissingCount)) +
-  geom_bar(stat = "identity", fill = "orange", color = "black") +
-  labs(title = "Number of Missing Values Per Column", x = "Variable", y = "Count") +
-  theme_minimal() +
-  coord_flip()
+# Print renamed and filtered columns for verification
+print("Renamed and Filtered Columns:")
+print(colnames(filtered_data))
 ```
+
+```{r}
+missing_summary <- filtered_data %>%
+  summarise(across(everything(), ~ sum(is.na(.)))) %>%
+  pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
+  arrange(desc(MissingCount))
+
+# Print missing value summary
+print("Missing Values Summary:")
+print(missing_summary)
+
+# Calculate Missing Value Percentages
+missing_summary <- missing_summary %>%
+  mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
+
+# Print missing percentages
+print("Missing Values Percentage:")
+print(missing_summary)
+
+# Visualize Missing Values
+# Heatmap of Missingness
+row_missing_summary <- filtered_data %>%
+  mutate(MissingCount = rowSums(is.na(.))) %>%
+  group_by(MissingCount) %>%
+  summarize(Count = n()) %>%
+  arrange(MissingCount)
+
+# Plot the Improved Distribution
+ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
+  geom_text(aes(label = Count), vjust = -0.3, size = 4) +
+  scale_x_continuous(breaks = 0:max(row_missing_summary$MissingCount)) +
+  labs(
+    title = "Distribution of Missing Data Across Rows",
+    subtitle = "Number of rows with varying levels of missing data",
+    x = "Number of Missing Values in a Row",
+    y = "Frequency (Number of Rows)"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 12)
+  )
+
+ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
+  geom_bar(stat = "identity", fill = "steelblue", color = "black") +
+  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  labs(
+    title = "Percentage of Missing Values by Column",
+    subtitle = "Highlighting the extent of missing data in each variable",
+    x = "Columns",
+    y = "Percentage Missing"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 14),
+    plot.subtitle = element_text(hjust = 0.5, size = 12)
+  )
+```
+
