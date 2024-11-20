@@ -1,7 +1,20 @@
 # Data
 
 ## Description
-The dataset used for this analysis is sourced from the American Community Survey (ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. Census Bureau, which conducts comprehensive surveys to assess housing characteristics across counties in the United States. The dataset is provided in a CSV format and includes over 240 columns with variables such as total housing units, occupancy rates, and housing costs. These variables are measured and updated annually, with detailed geographic identifiers for each county. The data is well-documented, and the source is reliable for understanding housing trends at a granular level. To import the data, I used standard data manipulation tools (e.g., Python's pandas library). Some challenges include the large number of columns and potential for missing values, which require preprocessing for effective analysis. The dataset can be accessed directly from the U.S. Census Bureau's data repository.
+(ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. 
+Census Bureau, which conducts comprehensive surveys to assess housing 
+characteristics across counties in the United States and the specific dataset we 
+are using is for the years 2016-2020. The dataset is provided in a CSV format and 
+includes over 240 columns with variables such as total housing units, occupancy 
+rates, and housing costs. These variables are measured and updated annually, 
+with detailed geographic identifiers for each county. The data is 
+well-documented, and the source is reliable for understanding housing trends at 
+a granular level. To import the data, I used standard data manipulation tools. 
+Some challenges include the large number of columns and potential for missing 
+values, which require preprocessing for effective analysis. Additionally, the 
+original column names in the dataset are not clear and understandable so we need 
+to rename the columns for clarity. The dataset can be accessed directly from the 
+U.S. Census Bureau's data repository.
 
 ## Missing value analysis
 ```{r}
@@ -118,4 +131,3 @@ ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = Missing
     plot.subtitle = element_text(hjust = 0.5, size = 12)
   )
 ```
-
