@@ -115,7 +115,13 @@ ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
   )
 
 ```
-This graph provides an overview of missing data across rows, illustrating how many rows have varying levels of missing values. It reveals that the dataset is predominantly complete, with 3,206 rows (the majority) containing no missing values. Only 13 rows have one missing value, and a mere 2 rows have two missing values. This low level of row-wise missingness indicates that removing rows with missing data would not significantly reduce the dataset's size or quality, making it an ideal candidate for robust analysis.
+This graph provides an overview of missing data across rows, illustrating how 
+many rows have varying levels of missing values. It reveals that the dataset is 
+predominantly complete, with 3,206 rows (the majority) containing no missing 
+values. Only 13 rows have one missing value, and a mere 2 rows have two missing 
+values. This low level of row-wise missingness indicates that removing rows 
+with missing data would not significantly reduce the dataset's size or quality, 
+making it an ideal candidate for robust analysis.
 
 ```{r}
 ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
@@ -136,4 +142,10 @@ ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = Missing
   )
 
 ```
-This graph highlights the completeness of the dataset by showing the percentage of missing values for each column. The majority of the columns are fully complete, with no missing values at all. Only a couple of variables, such as "Median_Contract_Rent," exhibit a small percentage of missing data (0.2%). This indicates that the dataset is highly reliable overall, with minimal data loss. The visualization helps identify the specific variables that may require further cleaning or imputation before analysis.
+This graph highlights the completeness of the dataset by showing the percentage
+of missing values for each column. The majority of the columns are fully 
+complete, with no missing values at all. Only a couple of variables, such as 
+"Median_Contract_Rent," exhibit a small percentage of missing data (0.2%). 
+This indicates that the dataset is highly reliable overall, with minimal data 
+loss. The visualization helps identify the specific variables that may require 
+further cleaning or imputation before analysis.
