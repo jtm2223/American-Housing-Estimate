@@ -23,7 +23,6 @@ library(naniar)
 file_path <- "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
 housing_data <- read.csv(file_path)
 
-# Rename specified columns explicitly
 filtered_data <- housing_data %>%
   rename(
     Occupancy_Status = B25002EST1,
@@ -42,7 +41,6 @@ filtered_data <- housing_data %>%
     Tenure_By_Selected_Physical_And_Financial_Conditions = B25123_TOT
   )
 
-# Keep only the renamed columns and the original identifiers
 columns_to_keep <- c(
   "Occupancy_Status",
   "Tenure_By_Household_Size",
@@ -64,7 +62,6 @@ columns_to_keep <- c(
 filtered_data <- filtered_data %>%
   select(all_of(columns_to_keep))
 
-# Print renamed and filtered columns for verification
 print("Renamed and Filtered Columns:")
 print(colnames(filtered_data))
 ```
@@ -75,27 +72,21 @@ missing_summary <- filtered_data %>%
   pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
   arrange(desc(MissingCount))
 
-# Print missing value summary
 print("Missing Values Summary:")
 print(missing_summary)
 
-# Calculate Missing Value Percentages
 missing_summary <- missing_summary %>%
   mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
 
-# Print missing percentages
 print("Missing Values Percentage:")
 print(missing_summary)
 
-# Visualize Missing Values
-# Heatmap of Missingness
 row_missing_summary <- filtered_data %>%
   mutate(MissingCount = rowSums(is.na(.))) %>%
   group_by(MissingCount) %>%
   summarize(Count = n()) %>%
   arrange(MissingCount)
 
-# Plot the Improved Distribution
 ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
   geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
   geom_text(aes(label = Count), vjust = -0.3, size = 4) +
@@ -123,24 +114,30 @@ level of missing values indicates that removing rows with missing data
 would not significantly reduce the dataset's size or quality, making it an 
 ideal candidate for robust analysis.
 
-```{r}
+```{r fig.width=10, fig.height=8}
+library(stringr)  
+
 ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
   geom_bar(stat = "identity", fill = "steelblue", color = "black") +
-  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), hjust = -0.1, size = 3.5) +
+  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), 
+            hjust = -0.2, size = 3.5) +
   coord_flip() +
   labs(
     title = "Percentage of Missing Values by Column",
-    subtitle = "Highlighting the extent of missing data in each variable",
+    subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),
     x = "Columns",
     y = "Percentage Missing"
   ) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = 14) +
   theme(
     axis.text.y = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, size = 14),
-    plot.subtitle = element_text(hjust = 0.5, size = 12)
+    axis.text.x = element_text(size = 10),
+    plot.title = element_text(hjust = 0.5, size = 16),
+    plot.subtitle = element_text(hjust = 0.5, size = 14),
+    plot.margin = margin(60, 20, 60, 20)
   )
 
+ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
 ```
 This graph shows tha the majority of the columns are fully complete, with no 
 missing values at all. "Median_Contract_Rent" is one of the few columns with a 
