@@ -1,9 +1,6 @@
-This project analyzes the Youth Risk Behavior Surveillance System (YRBSS) 
-dataset to explore health-related behaviors among adolescents. 
-The study focuses on understanding the patterns in physical activity, 
-sleep habits, and other key health indicators such as screen time 
-and dietary choices. By performing exploratory data analysis, the project aims
-to identify trends and correlations that highlight critical areas for public 
-health interventions, particularly among youth in different grades and 
-demographic groups. This work provides insights into how various risk factors 
-might influence adolescent health outcomes.
+This project analyzes U.S. housing data from the American Community Survey (ACS)
+to explore patterns and trends related to housing characteristics, such as 
+occupancy status, household size, and gross rent. A key focus is on identifying 
+missing data patterns to assess data quality and address potential gaps in the 
+dataset. Insights gained from this analysis will help understand housing trends 
+and ensure data completeness for accurate modeling and decision-making.

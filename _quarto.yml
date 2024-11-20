@@ -6,11 +6,11 @@ execute:
   echo: true
 
 book:
-  title: "Analysis of Global Health Expenditure"
+  title: "Analysis of American-Housing-Estimates"
   author:
     - Justin Mathew (JTM2223)
     - Aditiya Vurukala (AV3244)
-  repo-url: https://github.com/jtm2223/Global-Health-Expenditure
+  repo-url: https://github.com/jtm2223/American-Housing-Estimate
   date: November 18, 2024
   page-footer:
     right: |
