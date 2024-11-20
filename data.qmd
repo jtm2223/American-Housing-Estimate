@@ -141,5 +141,7 @@ ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = Missing
 ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
 ```
 This graph complements the previous graphic as it shows the columns with 
-missing values. The one difference is this one shows the missing values per column as a 
-percentage of total rows. It reveals that only two columns have a significant amount of missing values. Those two columns are the the Mortgage_Status_By_Median_Value and the "Median_Contract_Rent". Overall the data set is highly reliable with minimal data loss.
+missing values. The one difference is this one shows the missing values per 
+column as a percentage of total rows. It reveals that only two columns have a 
+significant amount of missing values. Those two columns are the the Mortgage_Status_By_Median_Value and the "Median_Contract_Rent". Overall, this 
+shows that the data set is highly reliable and has minimal data loss.
