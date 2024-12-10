@@ -138,6 +138,9 @@ missing_summary <- data %>%
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Missing_Count") %>%
   arrange(desc(Missing_Count))
 
+data_with_missing <- data %>%
+  select(where(~ any(is.na(.))))
+
 columns_with_missing <- missing_summary %>%
   filter(Missing_Count > 0)
 

@@ -128,4 +128,3 @@ ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
   labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
 
 ```
-
