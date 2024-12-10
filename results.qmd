@@ -128,3 +128,150 @@ ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
   labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
 
 ```
+
+6. 
+```{r}
+# Filter data for valid, non-missing, and positive values
+filtered_data <- data %>%
+  filter(!is.na(Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage.) &
+         !is.na(Contract_Rent.1000_to_1249.) &
+         Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage. > 0 &
+         Contract_Rent.1000_to_1249. > 0)
+
+# Scatter plot with regression line
+ggplot(filtered_data, aes(x = Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage., 
+                          y = Contract_Rent.1000_to_1249.)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Relationship Between Median Housing Value and Rent",
+    x = "Median Value for Units with Mortgage",
+    y = "Units with Rent $1000-$1249"
+  )
+
+```
+
+7. 
+```{r}
+heatmap_data <- data %>%
+  summarise(
+    No_Bedroom = sum(Bedrooms.No_bedroom., na.rm = TRUE),
+    One_Bedroom = sum(Bedrooms.1_bedroom., na.rm = TRUE),
+    Two_Bedrooms = sum(Bedrooms.2_bedrooms., na.rm = TRUE),
+    Three_Bedrooms = sum(Bedrooms.3_or_more_bedrooms., na.rm = TRUE),
+    Rent_500_to_599 = sum(Contract_Rent.500_to_599., na.rm = TRUE),
+    Rent_600_to_699 = sum(Contract_Rent.600_to_699., na.rm = TRUE)
+  )
+
+heatmap_data <- melt(heatmap_data)
+
+heatmap_data$Category <- ifelse(grepl("Bedroom", heatmap_data$variable), "Bedroom", "Rent")
+
+# Faceted bar plot
+ggplot(heatmap_data, aes(x = variable, y = value, fill = Category)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Category, scales = "free") +
+  labs(title = "Counts of Bedrooms and Rent Ranges",
+       x = "Variable",
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2", name = "Category")
+```
+
+8. 
+```{r}
+filtered_data <- data %>%
+  filter(Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. >= 1990 & 
+         Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. <= 2022)
+
+# Create the boxplot with smaller y-axis labels
+ggplot(filtered_data, aes(x = reorder(STATE_NAME, Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units., median),
+                          y = Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units.)) +
+  geom_boxplot(outlier.alpha = 0.3, fill = "skyblue", alpha = 0.6) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Variance in Year Built for Units by State (1990+)",
+    x = "State (Ordered by Median Year Built)",
+    y = "Year Built"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 8, hjust = 0.5),  # Make y-axis labels smaller
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.margin = margin(20, 50, 20, 50)  # Add extra padding around the plot
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +  # Add space above and below the boxplots
+  coord_flip()  # Flip coordinates for better readability
+
+```
+
+9. 
+```{r}
+ownership_data_by_state <- data %>%
+  group_by(STATE_NAME) %>%
+  summarise(
+    Owner_Occupied = sum(`Tenure_By_Household_Size.Owner_Occupied.`, na.rm = TRUE),
+    Renter_Occupied = sum(`Tenure_By_Household_Size.Renter_Occupied.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = c(Owner_Occupied, Renter_Occupied), names_to = "Ownership", values_to = "Units")
+
+ownership_diff <- ownership_data_by_state %>%
+  pivot_wider(names_from = Ownership, values_from = Units) %>%
+  mutate(Difference = abs(Owner_Occupied - Renter_Occupied))
+
+# Filter to keep only top N states by difference
+top_states <- ownership_diff %>%
+  arrange(desc(Difference)) %>%
+  slice_head(n = 10)  # Adjust 'n' to the desired number of top states
+
+# Plot the filtered data
+ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
+  geom_point(aes(y = Owner_Occupied, color = "Owner Occupied"), size = 3) +
+  geom_point(aes(y = Renter_Occupied, color = "Renter Occupied"), size = 3) +
+  geom_segment(aes(xend = STATE_NAME, y = Owner_Occupied, yend = Renter_Occupied), color = "gray") +
+  coord_flip() +
+  labs(
+    title = "Top States with Highest Difference in Ownership vs Renting",
+    x = "State",
+    y = "Proportion of Units",
+    color = "Ownership Type"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.y = element_text(size = 10),
+    plot.title = element_text(size = 16, face = "bold")
+  )
+
+```
+
+10. 
+```{r}
+structure_types <- data %>%
+  summarise(
+    Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
+    Attached = sum(`Units_In_Structure.1unit_attached_structure.`, na.rm = TRUE),
+    Two_to_Four_Units = sum(`Units_In_Structure.2_to_4_units.`, na.rm = TRUE),
+    Five_to_Nineteen_Units = sum(`Units_In_Structure.5_to_19_units.`, na.rm = TRUE),
+    Twenty_or_More_Units = sum(`Units_In_Structure.20_or_more_units.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Structure_Type", values_to = "Units")
+
+# Plot the proportions of units by structure type
+ggplot(structure_types, aes(x = Structure_Type, y = Units, fill = Structure_Type)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
+  coord_flip() +
+  labs(
+    title = "Proportion of Housing Units by Structure Type",
+    x = "Structure Type",
+    y = "Number of Units"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    plot.title = element_text(size = 16, face = "bold")
+  )
+
+```
