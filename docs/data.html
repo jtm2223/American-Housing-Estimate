@@ -184,7 +184,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#description" id="toc-description" class="nav-link active" data-scroll-target="#description"><span class="header-section-number">2.1</span> Description</a></li>
-  <li><a href="#missing-value-analysis" id="toc-missing-value-analysis" class="nav-link" data-scroll-target="#missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</a></li>
+  <li><a href="#loading-data" id="toc-loading-data" class="nav-link" data-scroll-target="#loading-data"><span class="header-section-number">2.2</span> Loading data</a></li>
+  <li><a href="#cleaning-data" id="toc-cleaning-data" class="nav-link" data-scroll-target="#cleaning-data"><span class="header-section-number">2.3</span> Cleaning Data</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jtm2223/American-Housing-Estimate/edit/main/data.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/jtm2223/American-Housing-Estimate/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -214,243 +215,342 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
 <p>(ACS) 5-Year Housing Estimates. The data is collected and maintained by the U.S. Census Bureau, which conducts comprehensive surveys to assess housing characteristics across counties in the United States and the specific dataset we are using is for the years 2016-2020. The dataset is provided in a CSV format and includes over 240 columns with variables such as total housing units, occupancy rates, and housing costs. These variables are measured and updated annually, with detailed geographic identifiers for each county. The data is well-documented, and the source is reliable for understanding housing trends at a granular level. To import the data, I used standard data manipulation tools. Some challenges include the large number of columns and potential for missing values, which require preprocessing for effective analysis. Additionally, the original column names in the dataset are not clear and understandable so we need to rename the columns for clarity. The dataset can be accessed directly from the U.S. Census Bureau’s data repository.</p>
 </section>
-<section id="missing-value-analysis" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>
+<section id="loading-data" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="loading-data"><span class="header-section-number">2.2</span> Loading data</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-✔ dplyr     1.1.4     ✔ readr     2.1.5
-✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-✔ purrr     1.0.2     
-── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✔ forcats   1.0.0     ✔ readr     2.1.5
+✔ ggplot2   3.5.1     ✔ stringr   1.5.1
+✔ lubridate 1.9.3     ✔ tibble    3.2.1
+✔ purrr     1.0.2     ✔ tidyr     1.3.1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(naniar) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>info_path <span class="ot">=</span> <span class="st">"DD_ACS_5-Year_Housing_Estimate_Data_by_County.xlsx"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>data_path <span class="ot">=</span> <span class="st">"ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>column_info <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(info_path)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(data_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'naniar' was built under R version 4.4.2</code></pre>
+</div>
+</section>
+<section id="cleaning-data" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="cleaning-data"><span class="header-section-number">2.3</span> Cleaning Data</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(column_info) <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">" "</span>, <span class="st">"_"</span>, <span class="fu">colnames</span>(column_info))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>column_info <span class="ot">&lt;-</span> column_info <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"as a %"</span>, Column_Description)) <span class="sc">|&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"B25068|B25058"</span>, Column_Name))</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">contains</span>(<span class="st">"B25068"</span>), <span class="sc">-</span><span class="fu">contains</span>(<span class="st">"B25058"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">contains</span>(<span class="st">"PCT"</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>column_info<span class="sc">$</span>Column_Description <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">" "</span>, <span class="st">"_"</span>, column_info<span class="sc">$</span>Column_Description)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>column_info<span class="sc">$</span>Column_Description <span class="ot">&lt;-</span> <span class="fu">gsub</span>(<span class="st">"[^[:alnum:]_]"</span>, </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>                                       <span class="st">""</span>, </span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>                                       column_info<span class="sc">$</span>Column_Description)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>table_name_mapping <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25002"</span> <span class="ot">=</span> <span class="st">"Occupancy_Status"</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25009"</span> <span class="ot">=</span> <span class="st">"Tenure_By_Household_Size"</span>,</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25021"</span> <span class="ot">=</span> <span class="st">"Median_Number_Of_Rooms_By_Tenure"</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25024"</span> <span class="ot">=</span> <span class="st">"Units_In_Structure"</span>,</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25032_OWN_"</span> <span class="ot">=</span> <span class="st">"Owner_Tenure_By_Units_In_Structure"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25032_RENT"</span> <span class="ot">=</span> <span class="st">"Renter_Tenure_By_Units_In_Structure"</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25036_OWN_"</span> <span class="ot">=</span> <span class="st">"Owner_Tenure_By_Year_Structure_Built"</span>,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25036_RENT"</span> <span class="ot">=</span> <span class="st">"Renter_Tenure_By_Year_Structure_Built"</span>,</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25037"</span> <span class="ot">=</span> <span class="st">"Median_Year_Structure_Built_By_Tenure"</span>,</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25041"</span> <span class="ot">=</span> <span class="st">"Bedrooms"</span>,</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25042"</span> <span class="ot">=</span> <span class="st">"Tenure_By_Bedrooms"</span>,</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25056"</span> <span class="ot">=</span> <span class="st">"Contract_Rent"</span>,</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25077"</span> <span class="ot">=</span> <span class="st">"Median_Value"</span>,</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25097"</span> <span class="ot">=</span> <span class="st">"Mortgage_Status_By_Median_Value"</span>,</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"B25123"</span> <span class="ot">=</span> <span class="st">"Tenure_By_Selected_Physical_And_Financial_Conditions"</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>owner_columns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"B25032EST2"</span>, <span class="st">"B25032EST3"</span>, <span class="st">"B25032EST4"</span>)</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>renter_columns <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"B25032EST13"</span>, <span class="st">"B25032EST14"</span>, <span class="st">"B25032EST15"</span>)</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>column_info<span class="sc">$</span>Column_Name <span class="ot">&lt;-</span> <span class="fu">sapply</span>(column_info<span class="sc">$</span>Column_Name, <span class="cf">function</span>(colname) {</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (colname <span class="sc">%in%</span> owner_columns) {</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">gsub</span>(<span class="st">"B25032EST"</span>, <span class="st">"B25032_OWN_EST"</span>, colname))  <span class="co"># For Owner columns</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (colname <span class="sc">%in%</span> renter_columns) {</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">gsub</span>(<span class="st">"B25032EST"</span>, <span class="st">"B25032_RENT_EST"</span>, colname))  <span class="co"># For Renter columns</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(colname)  <span class="co"># Keep other column names unchanged</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to update column names in data df</span></span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">colnames</span>(data), <span class="cf">function</span>(colname) {</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (colname <span class="sc">%in%</span> owner_columns) {</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the column is in the Owner list, append '_OWN_' to the name</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">gsub</span>(<span class="st">"B25032EST"</span>, <span class="st">"B25032_OWN_EST"</span>, colname))</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (colname <span class="sc">%in%</span> renter_columns) {</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># If the column is in the Renter list, append '_RENT_' to the name</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">gsub</span>(<span class="st">"B25032EST"</span>, <span class="st">"B25032_RENT_EST"</span>, colname))</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(colname)</span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>modify_column_description <span class="ot">&lt;-</span> <span class="cf">function</span>(column_name, description) {</span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>  prefix <span class="ot">&lt;-</span> <span class="fu">substr</span>(column_name, <span class="dv">1</span>, <span class="dv">6</span>)</span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>  prefix11 <span class="ot">&lt;-</span> <span class="fu">substr</span>(column_name, <span class="dv">1</span>, <span class="dv">11</span>)</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>  table_name <span class="ot">&lt;-</span> table_name_mapping[prefix]</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>  table_name_11 <span class="ot">&lt;-</span> table_name_mapping[prefix11]</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.na</span>(table_name_11) <span class="sc">&amp;&amp;</span> prefix <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"B25036"</span>, <span class="st">"B25032"</span>)) {</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    new_description <span class="ot">&lt;-</span> <span class="fu">paste</span>(table_name_11, <span class="st">"("</span>, description, <span class="st">")"</span>, <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(new_description)</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="sc">!</span><span class="fu">is.na</span>(table_name)) {</span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    new_description <span class="ot">&lt;-</span> <span class="fu">paste</span>(table_name, <span class="st">"("</span>, description, <span class="st">")"</span>, <span class="at">sep =</span> <span class="st">""</span>)</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(new_description)</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(description)</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>column_info<span class="sc">$</span>Column_Description <span class="ot">&lt;-</span> <span class="fu">mapply</span>(modify_column_description, </span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>                                         column_info<span class="sc">$</span>Column_Name, </span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>                                         column_info<span class="sc">$</span>Column_Description)</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>exclude_columns <span class="ot">&lt;-</span> </span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"OBJECTID"</span>, <span class="st">"GEOID"</span>, <span class="st">"STATE"</span>, <span class="st">"COUNTY"</span>, <span class="st">"NAME"</span>, <span class="st">"STUSAB"</span>, <span class="st">"STATE_NAME"</span>)</span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>column_info_filtered <span class="ot">&lt;-</span> column_info <span class="sc">|&gt;</span></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>Column_Name <span class="sc">%in%</span> exclude_columns)</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>column_name_to_description <span class="ot">&lt;-</span> <span class="fu">setNames</span>(column_info_filtered<span class="sc">$</span>Column_Description, </span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>                                       column_info_filtered<span class="sc">$</span>Column_Name)</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(data) <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">colnames</span>(data) <span class="sc">%in%</span> <span class="fu">names</span>(column_name_to_description),</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>                         column_name_to_description[<span class="fu">colnames</span>(data)],</span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>                         <span class="fu">colnames</span>(data))</span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="st">"B25123_TOT"</span>, <span class="st">"B25123_TOT_1"</span>, <span class="st">"B25123_TOT_2"</span>, </span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>            <span class="st">"B25123_TOT_3"</span>, <span class="st">"B25123_TOT_4"</span>))</span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Renamed Columns:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Renamed Columns:"</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="st">"ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>housing_data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(file_path)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>filtered_data <span class="ot">&lt;-</span> housing_data <span class="sc">%&gt;%</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">Occupancy_Status =</span> B25002EST1,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tenure_By_Household_Size =</span> B25009EST2,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median_Number_Of_Rooms_By_Tenure =</span> B25021EST1,</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">Units_In_Structure =</span> B25024EST2,</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tenure_By_Units_In_Structure =</span> B25032EST2,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tenure_By_Year_Structure_Built =</span> B25036_OWN_80TO99,</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median_Year_Structure_Built_By_Tenure =</span> B25037EST3,</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">Bedrooms =</span> B25041EST2,</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tenure_By_Bedrooms =</span> B25042EST3,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">Contract_Rent =</span> B25056_500TO599,</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Median_Contract_Rent =</span> B25058EST1,</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">Bedrooms_By_Gross_Rent =</span> B25068EST2,</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">Mortgage_Status_By_Median_Value =</span> B25097EST1,</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">Tenure_By_Selected_Physical_And_Financial_Conditions =</span> B25123_TOT</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>columns_to_keep <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Occupancy_Status"</span>,</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tenure_By_Household_Size"</span>,</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Median_Number_Of_Rooms_By_Tenure"</span>,</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Units_In_Structure"</span>,</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tenure_By_Units_In_Structure"</span>,</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tenure_By_Year_Structure_Built"</span>,</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Median_Year_Structure_Built_By_Tenure"</span>,</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bedrooms"</span>,</span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tenure_By_Bedrooms"</span>,</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Contract_Rent"</span>,</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Median_Contract_Rent"</span>,</span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Bedrooms_By_Gross_Rent"</span>,</span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Mortgage_Status_By_Median_Value"</span>,</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Tenure_By_Selected_Physical_And_Financial_Conditions"</span>,</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>  <span class="st">"OBJECTID_1"</span>, <span class="st">"GEOID"</span>, <span class="st">"STATE"</span>, <span class="st">"STUSAB"</span>, <span class="st">"STATE_NAME"</span>, <span class="st">"COUNTY"</span>, <span class="st">"NAME"</span></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>filtered_data <span class="ot">&lt;-</span> filtered_data <span class="sc">%&gt;%</span></span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(columns_to_keep))</span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Renamed and Filtered Columns:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colnames</span>(data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "Renamed and Filtered Columns:"</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">colnames</span>(filtered_data))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code> [1] "Occupancy_Status"                                    
- [2] "Tenure_By_Household_Size"                            
- [3] "Median_Number_Of_Rooms_By_Tenure"                    
- [4] "Units_In_Structure"                                  
- [5] "Tenure_By_Units_In_Structure"                        
- [6] "Tenure_By_Year_Structure_Built"                      
- [7] "Median_Year_Structure_Built_By_Tenure"               
- [8] "Bedrooms"                                            
- [9] "Tenure_By_Bedrooms"                                  
-[10] "Contract_Rent"                                       
-[11] "Median_Contract_Rent"                                
-[12] "Bedrooms_By_Gross_Rent"                              
-[13] "Mortgage_Status_By_Median_Value"                     
-[14] "Tenure_By_Selected_Physical_And_Financial_Conditions"
-[15] "OBJECTID_1"                                          
-[16] "GEOID"                                               
-[17] "STATE"                                               
-[18] "STUSAB"                                              
-[19] "STATE_NAME"                                          
-[20] "COUNTY"                                              
-[21] "NAME"                                                </code></pre>
+<pre><code>  [1] "OBJECTID_1"                                                                                          
+  [2] "GEOID"                                                                                               
+  [3] "STATE"                                                                                               
+  [4] "STUSAB"                                                                                              
+  [5] "STATE_NAME"                                                                                          
+  [6] "COUNTY"                                                                                              
+  [7] "NAME"                                                                                                
+  [8] "Occupancy_Status(Total_Housing_units)"                                                               
+  [9] "Occupancy_Status(Occupied_housing_units)"                                                            
+ [10] "Occupancy_Status(Vacant)"                                                                            
+ [11] "Tenure_By_Household_Size(Owner_Occupied)"                                                            
+ [12] "Tenure_By_Household_Size(Owner_Occupied_1Person_Household)"                                          
+ [13] "Tenure_By_Household_Size(Owner_Occupied_2Person_Household)"                                          
+ [14] "Tenure_By_Household_Size(Owner_Occupied_3Person_Household)"                                          
+ [15] "Tenure_By_Household_Size(Owner_Occupied_4Person_Household)"                                          
+ [16] "Tenure_By_Household_Size(Owner_Occupied_5Person_Household)"                                          
+ [17] "Tenure_By_Household_Size(Owner_Occupied_6ormore_Person_Household)"                                   
+ [18] "Tenure_By_Household_Size(Renter_Occupied)"                                                           
+ [19] "Tenure_By_Household_Size(Renter_Occupied_1Person_Household)"                                         
+ [20] "Tenure_By_Household_Size(Renter_Occupied_2Person_Household)"                                         
+ [21] "Tenure_By_Household_Size(Renter_Occupied_3Person_Household)"                                         
+ [22] "Tenure_By_Household_Size(Renter_Occupied_4Person_Household)"                                         
+ [23] "Tenure_By_Household_Size(Renter_Occupied_5Person_Household)"                                         
+ [24] "Tenure_By_Household_Size(Renter_Occupied_6ormore_Person_Household)"                                  
+ [25] "Tenure_By_Household_Size(Total_1Person_Household)"                                                   
+ [26] "Tenure_By_Household_Size(Total_2Person_Household)"                                                   
+ [27] "Tenure_By_Household_Size(Total_3Person_Household)"                                                   
+ [28] "Tenure_By_Household_Size(Total_4Person_Household)"                                                   
+ [29] "Tenure_By_Household_Size(Total_5Person_Household)"                                                   
+ [30] "Tenure_By_Household_Size(Total_6Person_Household)"                                                   
+ [31] "Median_Year_Structure_Built_By_Tenure(Median_Year_Structure_Built_for_Renter_Occupied_Units)"        
+ [32] "Bedrooms(No_bedroom)"                                                                                
+ [33] "Bedrooms(1_bedroom)"                                                                                 
+ [34] "Bedrooms(2_bedrooms)"                                                                                
+ [35] "Bedrooms(3_or_more_bedrooms)"                                                                        
+ [36] "Median_Number_Of_Rooms_By_Tenure(Median_number_of_rooms)"                                            
+ [37] "Median_Number_Of_Rooms_By_Tenure(Median_number_of_rooms__Owner_occupied)"                            
+ [38] "Median_Number_Of_Rooms_By_Tenure(Median_number_of_rooms__Renter_occupied)"                           
+ [39] "Units_In_Structure(1unit_detached_structure)"                                                        
+ [40] "Units_In_Structure(1unit_attached_structure)"                                                        
+ [41] "Units_In_Structure(2_to_4_units)"                                                                    
+ [42] "Units_In_Structure(5_to_19_units)"                                                                   
+ [43] "Units_In_Structure(20_or_more_units)"                                                                
+ [44] "Units_In_Structure(Mobile_home_Boat_RV_van_et)"                                                      
+ [45] "Owner_Tenure_By_Units_In_Structure(Owneroccupied_housing_units)"                                     
+ [46] "Owner_Tenure_By_Units_In_Structure(1_detached)"                                                      
+ [47] "Owner_Tenure_By_Units_In_Structure(1_attached)"                                                      
+ [48] "Owner_Tenure_By_Units_In_Structure(2_to_4)"                                                          
+ [49] "Owner_Tenure_By_Units_In_Structure(5_to_19)"                                                         
+ [50] "Owner_Tenure_By_Units_In_Structure(20_or_more_units)"                                                
+ [51] "Owner_Tenure_By_Units_In_Structure(Mobile_home_Boat_RV_van_et)"                                      
+ [52] "Renter_Tenure_By_Units_In_Structure(Renteroccupied_housing_units)"                                   
+ [53] "Renter_Tenure_By_Units_In_Structure(1_detached)"                                                     
+ [54] "Renter_Tenure_By_Units_In_Structure(1_attached)"                                                     
+ [55] "Renter_Tenure_By_Units_In_Structure(2_to_4)"                                                         
+ [56] "Renter_Tenure_By_Units_In_Structure(5_to_19)"                                                        
+ [57] "Renter_Tenure_By_Units_In_Structure(20_or_more_units)"                                               
+ [58] "Renter_Tenure_By_Units_In_Structure(Mobile_home_Boat_RV_van_et)"                                     
+ [59] "Owner_Tenure_By_Year_Structure_Built(Owner_occupied_housing_units_Built_2000_or_later)"              
+ [60] "Owner_Tenure_By_Year_Structure_Built(Owner_occupied_housing_units_Built_1980_to_1999)"               
+ [61] "Owner_Tenure_By_Year_Structure_Built(Owner_occupied_housing_units_Built_1950_to_1979)"               
+ [62] "Owner_Tenure_By_Year_Structure_Built(Owner_occupied_housing_units_Built_1949_or_earlier)"            
+ [63] "Renter_Tenure_By_Year_Structure_Built(Renter_occupied_housing_units_Built_2000_or_later)"            
+ [64] "Renter_Tenure_By_Year_Structure_Built(Renter_occupied_housing_units_Built_1980_to_1999)"             
+ [65] "Renter_Tenure_By_Year_Structure_Built(Renter_occupied_housing_units_Built_1950_to_1979)"             
+ [66] "Renter_Tenure_By_Year_Structure_Built(Renter_occupied_housing_units_Built_1949_or_earlier)"          
+ [67] "Renter_Tenure_By_Year_Structure_Built(Renter_occupied_housing_units_Built_before_1980)"              
+ [68] "Housing_units_Built_2000_or_later"                                                                   
+ [69] "Owner_occupied_housing_units_Built_1980_to_1999"                                                     
+ [70] "Owner_occupied_housing_units_Built_1950_to_1979"                                                     
+ [71] "Owner_occupied_housing_units_Built_1949_or_earlier"                                                  
+ [72] "Contract_Rent(With_cash_rent_less_than_499)"                                                         
+ [73] "Contract_Rent(500_to_599)"                                                                           
+ [74] "Contract_Rent(600_to_699)"                                                                           
+ [75] "Contract_Rent(700_to_799)"                                                                           
+ [76] "Contract_Rent(800_to_899)"                                                                           
+ [77] "Contract_Rent(900_to_999)"                                                                           
+ [78] "Contract_Rent(1000_to_1249)"                                                                         
+ [79] "Contract_Rent(1250_to_1499)"                                                                         
+ [80] "Contract_Rent(1500_to_1999)"                                                                         
+ [81] "Contract_Rent(2000_or_more)"                                                                         
+ [82] "Contract_Rent(No_cash_rent)"                                                                         
+ [83] "Tenure_By_Bedrooms(Owner_occupied_housing_units_with_No_bedroom)"                                    
+ [84] "Tenure_By_Bedrooms(Owner_occupied_housing_units_with_1_bedroom)"                                     
+ [85] "Tenure_By_Bedrooms(Owner_occupied_housing_units_with_2_bedrooms)"                                    
+ [86] "Tenure_By_Bedrooms(Owner_occupied_housing_units_with_3_or_more_bedrooms)"                            
+ [87] "Tenure_By_Bedrooms(Renter_occupied_housing_units_with_No_bedroom)"                                   
+ [88] "Tenure_By_Bedrooms(Renter_occupied_housing_units_with_1_bedroom)"                                    
+ [89] "Tenure_By_Bedrooms(Renter_occupied_housing_units_with_2_bedrooms)"                                   
+ [90] "Tenure_By_Bedrooms(Renter_occupied_housing_units_with_3_or_more_bedrooms)"                           
+ [91] "Mortgage_Status_By_Median_Value(Median_value__Owneroccupied_housing_units)"                          
+ [92] "Mortgage_Status_By_Median_Value(Median_value_for_units_with_a_mortgage)"                             
+ [93] "Mortgage_Status_By_Median_Value(Median_value_for_units_without_a_mortgage)"                          
+ [94] "Tenure_By_Selected_Physical_And_Financial_Conditions(Owner_occupied_With_one_selected_condition)"    
+ [95] "Tenure_By_Selected_Physical_And_Financial_Conditions(Owner_occupied_With_two_selected_conditions)"   
+ [96] "Tenure_By_Selected_Physical_And_Financial_Conditions(Owner_occupied_With_three_selected_conditions)" 
+ [97] "Tenure_By_Selected_Physical_And_Financial_Conditions(Owner_occupied_With_four_selected_conditions)"  
+ [98] "Tenure_By_Selected_Physical_And_Financial_Conditions(Owner_occupied_No_selected_conditions)"         
+ [99] "Tenure_By_Selected_Physical_And_Financial_Conditions(Renter_occupied_With_one_selected_condition)"   
+[100] "Tenure_By_Selected_Physical_And_Financial_Conditions(Renter_occupied_With_two_selected_conditions)"  
+[101] "Tenure_By_Selected_Physical_And_Financial_Conditions(Renter_occupied_With_three_selected_conditions)"
+[102] "Tenure_By_Selected_Physical_And_Financial_Conditions(Renter_occupied_With_four_selected_conditions)" 
+[103] "Tenure_By_Selected_Physical_And_Financial_Conditions(Renter_occupied_No_selected_conditions)"        
+[104] "Shape__Area"                                                                                         
+[105] "Shape__Length"                                                                                       </code></pre>
 </div>
 </div>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>missing_summary <span class="ot">&lt;-</span> filtered_data <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">sum</span>(<span class="fu">is.na</span>(.)))) <span class="sc">%&gt;%</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">names_to =</span> <span class="st">"Column"</span>, <span class="at">values_to =</span> <span class="st">"MissingCount"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(MissingCount))</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Missing Values Summary:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># missing_summary &lt;- filtered_data %&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarise(across(everything(), ~ sum(is.na(.)))) %&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(desc(MissingCount))</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="co"># print("Missing Values Summary:")</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># print(missing_summary)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co"># missing_summary &lt;- missing_summary %&gt;%</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># print("Missing Values Percentage:")</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># print(missing_summary)</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># row_missing_summary &lt;- filtered_data %&gt;%</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   mutate(MissingCount = rowSums(is.na(.))) %&gt;%</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(MissingCount) %&gt;%</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   summarize(Count = n()) %&gt;%</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   arrange(MissingCount)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_text(aes(label = Count), vjust = -0.3, size = 4) +</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_x_continuous(breaks = 0:max(row_missing_summary$MissingCount)) +</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     title = "Distribution of Missing Data Across Rows",</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a><span class="co">#     subtitle = "Number of rows with varying levels of missing data",</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co">#     x = "Number of Missing Values in a Row",</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="co">#     y = "Frequency (Number of Rows)"</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   ) +</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal(base_size = 12) +</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="co">#     axis.text.x = element_text(size = 10),</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a><span class="co">#     axis.text.y = element_text(size = 10),</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co">#     plot.title = element_text(hjust = 0.5, size = 16),</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="co">#     plot.subtitle = element_text(hjust = 0.5, size = 12)</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a><span class="co">#   )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Missing Values Summary:"</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(missing_summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 21 × 2
-   Column                                MissingCount
-   &lt;chr&gt;                                        &lt;int&gt;
- 1 Median_Contract_Rent                            12
- 2 Mortgage_Status_By_Median_Value                  5
- 3 Occupancy_Status                                 0
- 4 Tenure_By_Household_Size                         0
- 5 Median_Number_Of_Rooms_By_Tenure                 0
- 6 Units_In_Structure                               0
- 7 Tenure_By_Units_In_Structure                     0
- 8 Tenure_By_Year_Structure_Built                   0
- 9 Median_Year_Structure_Built_By_Tenure            0
-10 Bedrooms                                         0
-# ℹ 11 more rows</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>missing_summary <span class="ot">&lt;-</span> missing_summary <span class="sc">%&gt;%</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MissingPercentage =</span> (MissingCount <span class="sc">/</span> <span class="fu">nrow</span>(filtered_data)) <span class="sc">*</span> <span class="dv">100</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"Missing Values Percentage:"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "Missing Values Percentage:"</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(missing_summary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 21 × 3
-   Column                                MissingCount MissingPercentage
-   &lt;chr&gt;                                        &lt;int&gt;             &lt;dbl&gt;
- 1 Median_Contract_Rent                            12             0.373
- 2 Mortgage_Status_By_Median_Value                  5             0.155
- 3 Occupancy_Status                                 0             0    
- 4 Tenure_By_Household_Size                         0             0    
- 5 Median_Number_Of_Rooms_By_Tenure                 0             0    
- 6 Units_In_Structure                               0             0    
- 7 Tenure_By_Units_In_Structure                     0             0    
- 8 Tenure_By_Year_Structure_Built                   0             0    
- 9 Median_Year_Structure_Built_By_Tenure            0             0    
-10 Bedrooms                                         0             0    
-# ℹ 11 more rows</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>row_missing_summary <span class="ot">&lt;-</span> filtered_data <span class="sc">%&gt;%</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">MissingCount =</span> <span class="fu">rowSums</span>(<span class="fu">is.na</span>(.))) <span class="sc">%&gt;%</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(MissingCount) <span class="sc">%&gt;%</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Count =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(MissingCount)</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(row_missing_summary, <span class="fu">aes</span>(<span class="at">x =</span> MissingCount, <span class="at">y =</span> Count)) <span class="sc">+</span></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">width =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> Count), <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.3</span>, <span class="at">size =</span> <span class="dv">4</span>) <span class="sc">+</span></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="dv">0</span><span class="sc">:</span><span class="fu">max</span>(row_missing_summary<span class="sc">$</span>MissingCount)) <span class="sc">+</span></span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Missing Data Across Rows"</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Number of rows with varying levels of missing data"</span>,</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Number of Missing Values in a Row"</span>,</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Frequency (Number of Rows)"</span></span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">16</span>),</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">12</span>)</span>
-<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="data_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
 </div>
 <p>This bar plot provides an overview of missing data across rows, illustrating how many rows have varying levels of missing values. It reveals that the data set is mostly complete, with 3,206 rows containing no missing values. Only 13 rows have one missing value, and 2 rows have only two missing values. This low level of missing values indicates that removing rows with missing data would not significantly reduce the dataset’s size or quality, making it an ideal candidate for robust analysis.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stringr)  </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(missing_summary, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(Column, <span class="sc">-</span>MissingPercentage), <span class="at">y =</span> MissingPercentage)) <span class="sc">+</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> <span class="fu">paste0</span>(<span class="fu">round</span>(MissingPercentage, <span class="dv">1</span>), <span class="st">"%"</span>)), </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">hjust =</span> <span class="sc">-</span><span class="fl">0.2</span>, <span class="at">size =</span> <span class="fl">3.5</span>) <span class="sc">+</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Percentage of Missing Values by Column"</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="fu">str_wrap</span>(<span class="st">"Highlighting the extent of missing data in each variable"</span>, <span class="dv">50</span>),</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Columns"</span>,</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Percentage Missing"</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="at">by =</span> <span class="fl">0.05</span>)) <span class="sc">+</span></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">6</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">16</span>),</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="dv">14</span>),</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">60</span>, <span class="dv">20</span>, <span class="dv">40</span>, <span class="dv">20</span>)</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="data_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="960"></p>
-</figure>
-</div>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(<span class="st">"missing_values_plot_fixed.png"</span>, <span class="at">width =</span> <span class="dv">12</span>, <span class="at">height =</span> <span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(stringr)  </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_bar(stat = "identity", fill = "steelblue", color = "black") +</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), </span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co">#             hjust = -0.2, size = 3.5) +</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip() +</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   labs(</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     title = "Percentage of Missing Values by Column",</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     x = "Columns",</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     y = "Percentage Missing"</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   ) +</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_y_continuous(breaks = seq(0, 0.5, by = 0.05)) +</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme_minimal(base_size = 14) +</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     axis.text.y = element_text(size = 6, angle = 45, hjust = 1),</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="co">#     axis.text.x = element_text(size = 10),</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="co">#     plot.title = element_text(hjust = 0.5, size = 16),</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a><span class="co">#     plot.subtitle = element_text(hjust = 0.5, size = 14),</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a><span class="co">#     plot.margin = margin(60, 20, 40, 20)</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   )</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ggsave("missing_values_plot_fixed.png", width = 12, height = 9)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>This graph complements the previous graphic as it shows the columns with missing values. The one difference is this one shows the missing values per column as a percentage of total rows. It reveals that only two columns have a significant amount of missing values. Those two columns are the the Mortgage_Status_By_Median_Value and the “Median_Contract_Rent”. Overall, this shows that the data set is highly reliable and has minimal data loss.</p>

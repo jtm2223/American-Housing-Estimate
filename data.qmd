@@ -16,94 +16,158 @@ original column names in the dataset are not clear and understandable so we need
 to rename the columns for clarity. The dataset can be accessed directly from the 
 U.S. Census Bureau's data repository.
 
-## Missing value analysis
+## Loading data
 ```{r}
-library(tidyverse)  
-library(naniar) 
-file_path <- "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
-housing_data <- read.csv(file_path)
+library(dplyr)
+library(readxl)
+library(tidyverse)
 
-filtered_data <- housing_data %>%
-  rename(
-    Occupancy_Status = B25002EST1,
-    Tenure_By_Household_Size = B25009EST2,
-    Median_Number_Of_Rooms_By_Tenure = B25021EST1,
-    Units_In_Structure = B25024EST2,
-    Tenure_By_Units_In_Structure = B25032EST2,
-    Tenure_By_Year_Structure_Built = B25036_OWN_80TO99,
-    Median_Year_Structure_Built_By_Tenure = B25037EST3,
-    Bedrooms = B25041EST2,
-    Tenure_By_Bedrooms = B25042EST3,
-    Contract_Rent = B25056_500TO599,
-    Median_Contract_Rent = B25058EST1,
-    Bedrooms_By_Gross_Rent = B25068EST2,
-    Mortgage_Status_By_Median_Value = B25097EST1,
-    Tenure_By_Selected_Physical_And_Financial_Conditions = B25123_TOT
-  )
+info_path = "DD_ACS_5-Year_Housing_Estimate_Data_by_County.xlsx"
+data_path = "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
 
-columns_to_keep <- c(
-  "Occupancy_Status",
-  "Tenure_By_Household_Size",
-  "Median_Number_Of_Rooms_By_Tenure",
-  "Units_In_Structure",
-  "Tenure_By_Units_In_Structure",
-  "Tenure_By_Year_Structure_Built",
-  "Median_Year_Structure_Built_By_Tenure",
-  "Bedrooms",
-  "Tenure_By_Bedrooms",
-  "Contract_Rent",
-  "Median_Contract_Rent",
-  "Bedrooms_By_Gross_Rent",
-  "Mortgage_Status_By_Median_Value",
-  "Tenure_By_Selected_Physical_And_Financial_Conditions",
-  "OBJECTID_1", "GEOID", "STATE", "STUSAB", "STATE_NAME", "COUNTY", "NAME"
+column_info <- read_excel(info_path)
+data <- read.csv(data_path)
+```
+
+## Cleaning Data
+```{r}
+colnames(column_info) <- gsub(" ", "_", colnames(column_info))
+
+column_info <- column_info |>
+  filter(!grepl("as a %", Column_Description)) |>
+  filter(!grepl("B25068|B25058", Column_Name))
+
+data <- data |>
+  select(-contains("B25068"), -contains("B25058")) |> 
+  select(-contains("PCT"))
+
+column_info$Column_Description <- gsub(" ", "_", column_info$Column_Description)
+
+column_info$Column_Description <- gsub("[^[:alnum:]_]", 
+                                       "", 
+                                       column_info$Column_Description)
+table_name_mapping <- c(
+  "B25002" = "Occupancy_Status",
+  "B25009" = "Tenure_By_Household_Size",
+  "B25021" = "Median_Number_Of_Rooms_By_Tenure",
+  "B25024" = "Units_In_Structure",
+  "B25032_OWN_" = "Owner_Tenure_By_Units_In_Structure",
+  "B25032_RENT" = "Renter_Tenure_By_Units_In_Structure",
+  "B25036_OWN_" = "Owner_Tenure_By_Year_Structure_Built",
+  "B25036_RENT" = "Renter_Tenure_By_Year_Structure_Built",
+  "B25037" = "Median_Year_Structure_Built_By_Tenure",
+  "B25041" = "Bedrooms",
+  "B25042" = "Tenure_By_Bedrooms",
+  "B25056" = "Contract_Rent",
+  "B25077" = "Median_Value",
+  "B25097" = "Mortgage_Status_By_Median_Value",
+  "B25123" = "Tenure_By_Selected_Physical_And_Financial_Conditions"
 )
 
-filtered_data <- filtered_data %>%
-  select(all_of(columns_to_keep))
+owner_columns <- c("B25032EST2", "B25032EST3", "B25032EST4")
+renter_columns <- c("B25032EST13", "B25032EST14", "B25032EST15")
 
-print("Renamed and Filtered Columns:")
-print(colnames(filtered_data))
+column_info$Column_Name <- sapply(column_info$Column_Name, function(colname) {
+  if (colname %in% owner_columns) {
+    return(gsub("B25032EST", "B25032_OWN_EST", colname))  # For Owner columns
+  } else if (colname %in% renter_columns) {
+    return(gsub("B25032EST", "B25032_RENT_EST", colname))  # For Renter columns
+  }
+  return(colname)  # Keep other column names unchanged
+})
+
+
+# Function to update column names in data df
+colnames(data) <- sapply(colnames(data), function(colname) {
+  if (colname %in% owner_columns) {
+    # If the column is in the Owner list, append '_OWN_' to the name
+    return(gsub("B25032EST", "B25032_OWN_EST", colname))
+  } else if (colname %in% renter_columns) {
+    # If the column is in the Renter list, append '_RENT_' to the name
+    return(gsub("B25032EST", "B25032_RENT_EST", colname))
+  }
+  return(colname)
+})
+
+modify_column_description <- function(column_name, description) {
+  prefix <- substr(column_name, 1, 6)
+  prefix11 <- substr(column_name, 1, 11)
+
+  table_name <- table_name_mapping[prefix]
+  table_name_11 <- table_name_mapping[prefix11]
+  if (!is.na(table_name_11) && prefix %in% c("B25036", "B25032")) {
+    new_description <- paste(table_name_11, "(", description, ")", sep = "")
+    return(new_description)
+  } else if (!is.na(table_name)) {
+    new_description <- paste(table_name, "(", description, ")", sep = "")
+    return(new_description)
+  }
+  return(description)
+}
+
+column_info$Column_Description <- mapply(modify_column_description, 
+                                         column_info$Column_Name, 
+                                         column_info$Column_Description)
+
+exclude_columns <- 
+  c("OBJECTID", "GEOID", "STATE", "COUNTY", "NAME", "STUSAB", "STATE_NAME")
+
+column_info_filtered <- column_info |>
+  filter(!Column_Name %in% exclude_columns)
+
+column_name_to_description <- setNames(column_info_filtered$Column_Description, 
+                                       column_info_filtered$Column_Name)
+
+colnames(data) <- ifelse(colnames(data) %in% names(column_name_to_description),
+                         column_name_to_description[colnames(data)],
+                         colnames(data))
+
+data <- data %>%
+  select(-c("B25123_TOT", "B25123_TOT_1", "B25123_TOT_2", 
+            "B25123_TOT_3", "B25123_TOT_4"))
+
+print("Renamed Columns:")
+print(colnames(data))
 ```
 
 ```{r}
-missing_summary <- filtered_data %>%
-  summarise(across(everything(), ~ sum(is.na(.)))) %>%
-  pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
-  arrange(desc(MissingCount))
-
-print("Missing Values Summary:")
-print(missing_summary)
-
-missing_summary <- missing_summary %>%
-  mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
-
-print("Missing Values Percentage:")
-print(missing_summary)
-
-row_missing_summary <- filtered_data %>%
-  mutate(MissingCount = rowSums(is.na(.))) %>%
-  group_by(MissingCount) %>%
-  summarize(Count = n()) %>%
-  arrange(MissingCount)
-
-ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
-  geom_text(aes(label = Count), vjust = -0.3, size = 4) +
-  scale_x_continuous(breaks = 0:max(row_missing_summary$MissingCount)) +
-  labs(
-    title = "Distribution of Missing Data Across Rows",
-    subtitle = "Number of rows with varying levels of missing data",
-    x = "Number of Missing Values in a Row",
-    y = "Frequency (Number of Rows)"
-  ) +
-  theme_minimal(base_size = 12) +
-  theme(
-    axis.text.x = element_text(size = 10),
-    axis.text.y = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12)
-  )
+# missing_summary <- filtered_data %>%
+#   summarise(across(everything(), ~ sum(is.na(.)))) %>%
+#   pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
+#   arrange(desc(MissingCount))
+# 
+# print("Missing Values Summary:")
+# print(missing_summary)
+# 
+# missing_summary <- missing_summary %>%
+#   mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
+# 
+# print("Missing Values Percentage:")
+# print(missing_summary)
+# 
+# row_missing_summary <- filtered_data %>%
+#   mutate(MissingCount = rowSums(is.na(.))) %>%
+#   group_by(MissingCount) %>%
+#   summarize(Count = n()) %>%
+#   arrange(MissingCount)
+# 
+# ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
+#   geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
+#   geom_text(aes(label = Count), vjust = -0.3, size = 4) +
+#   scale_x_continuous(breaks = 0:max(row_missing_summary$MissingCount)) +
+#   labs(
+#     title = "Distribution of Missing Data Across Rows",
+#     subtitle = "Number of rows with varying levels of missing data",
+#     x = "Number of Missing Values in a Row",
+#     y = "Frequency (Number of Rows)"
+#   ) +
+#   theme_minimal(base_size = 12) +
+#   theme(
+#     axis.text.x = element_text(size = 10),
+#     axis.text.y = element_text(size = 10),
+#     plot.title = element_text(hjust = 0.5, size = 16),
+#     plot.subtitle = element_text(hjust = 0.5, size = 12)
+#   )
 
 ```
 This bar plot provides an overview of missing data across rows, illustrating how 
@@ -115,30 +179,30 @@ would not significantly reduce the dataset's size or quality, making it an
 ideal candidate for robust analysis.
 
 ```{r fig.width=10, fig.height=8}
-library(stringr)  
-
-ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
-  geom_bar(stat = "identity", fill = "steelblue", color = "black") +
-  geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), 
-            hjust = -0.2, size = 3.5) +
-  coord_flip() +
-  labs(
-    title = "Percentage of Missing Values by Column",
-    subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),
-    x = "Columns",
-    y = "Percentage Missing"
-  ) +
-  scale_y_continuous(breaks = seq(0, 0.5, by = 0.05)) +
-  theme_minimal(base_size = 14) +
-  theme(
-    axis.text.y = element_text(size = 6, angle = 45, hjust = 1),
-    axis.text.x = element_text(size = 10),
-    plot.title = element_text(hjust = 0.5, size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 14),
-    plot.margin = margin(60, 20, 40, 20)
-  )
-
-ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
+# library(stringr)  
+# 
+# ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
+#   geom_bar(stat = "identity", fill = "steelblue", color = "black") +
+#   geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), 
+#             hjust = -0.2, size = 3.5) +
+#   coord_flip() +
+#   labs(
+#     title = "Percentage of Missing Values by Column",
+#     subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),
+#     x = "Columns",
+#     y = "Percentage Missing"
+#   ) +
+#   scale_y_continuous(breaks = seq(0, 0.5, by = 0.05)) +
+#   theme_minimal(base_size = 14) +
+#   theme(
+#     axis.text.y = element_text(size = 6, angle = 45, hjust = 1),
+#     axis.text.x = element_text(size = 10),
+#     plot.title = element_text(hjust = 0.5, size = 16),
+#     plot.subtitle = element_text(hjust = 0.5, size = 14),
+#     plot.margin = margin(60, 20, 40, 20)
+#   )
+# 
+# ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
 ```
 This graph complements the previous graphic as it shows the columns with 
 missing values. The one difference is this one shows the missing values per 
