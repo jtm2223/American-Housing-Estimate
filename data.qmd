@@ -128,84 +128,49 @@ data <- data %>%
 
 print("Renamed Columns:")
 print(colnames(data))
+write.csv(data, "data.csv", row.names = FALSE)
+
 ```
 
 ```{r}
-# missing_summary <- filtered_data %>%
-#   summarise(across(everything(), ~ sum(is.na(.)))) %>%
-#   pivot_longer(cols = everything(), names_to = "Column", values_to = "MissingCount") %>%
-#   arrange(desc(MissingCount))
-# 
-# print("Missing Values Summary:")
-# print(missing_summary)
-# 
-# missing_summary <- missing_summary %>%
-#   mutate(MissingPercentage = (MissingCount / nrow(filtered_data)) * 100)
-# 
-# print("Missing Values Percentage:")
-# print(missing_summary)
-# 
-# row_missing_summary <- filtered_data %>%
-#   mutate(MissingCount = rowSums(is.na(.))) %>%
-#   group_by(MissingCount) %>%
-#   summarize(Count = n()) %>%
-#   arrange(MissingCount)
-# 
-# ggplot(row_missing_summary, aes(x = MissingCount, y = Count)) +
-#   geom_bar(stat = "identity", fill = "skyblue", color = "black", width = 0.8) +
-#   geom_text(aes(label = Count), vjust = -0.3, size = 4) +
-#   scale_x_continuous(breaks = 0:max(row_missing_summary$MissingCount)) +
-#   labs(
-#     title = "Distribution of Missing Data Across Rows",
-#     subtitle = "Number of rows with varying levels of missing data",
-#     x = "Number of Missing Values in a Row",
-#     y = "Frequency (Number of Rows)"
-#   ) +
-#   theme_minimal(base_size = 12) +
-#   theme(
-#     axis.text.x = element_text(size = 10),
-#     axis.text.y = element_text(size = 10),
-#     plot.title = element_text(hjust = 0.5, size = 16),
-#     plot.subtitle = element_text(hjust = 0.5, size = 12)
-#   )
+missing_summary <- data %>%
+  summarise_all(~sum(is.na(.))) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Missing_Count") %>%
+  arrange(desc(Missing_Count))
+
+columns_with_missing <- missing_summary %>%
+  filter(Missing_Count > 0)
+
+# Print only columns with missing values
+print(columns_with_missing)
 
 ```
-This bar plot provides an overview of missing data across rows, illustrating how 
-many rows have varying levels of missing values. It reveals that the data set is 
-mostly complete, with 3,206 rows containing no missing values. Only 13 rows 
-have one missing value, and 2 rows have only two missing values. This low 
-level of missing values indicates that removing rows with missing data 
-would not significantly reduce the dataset's size or quality, making it an 
-ideal candidate for robust analysis.
-
-```{r fig.width=10, fig.height=8}
-# library(stringr)  
-# 
-# ggplot(missing_summary, aes(x = reorder(Column, -MissingPercentage), y = MissingPercentage)) +
-#   geom_bar(stat = "identity", fill = "steelblue", color = "black") +
-#   geom_text(aes(label = paste0(round(MissingPercentage, 1), "%")), 
-#             hjust = -0.2, size = 3.5) +
-#   coord_flip() +
-#   labs(
-#     title = "Percentage of Missing Values by Column",
-#     subtitle = str_wrap("Highlighting the extent of missing data in each variable", 50),
-#     x = "Columns",
-#     y = "Percentage Missing"
-#   ) +
-#   scale_y_continuous(breaks = seq(0, 0.5, by = 0.05)) +
-#   theme_minimal(base_size = 14) +
-#   theme(
-#     axis.text.y = element_text(size = 6, angle = 45, hjust = 1),
-#     axis.text.x = element_text(size = 10),
-#     plot.title = element_text(hjust = 0.5, size = 16),
-#     plot.subtitle = element_text(hjust = 0.5, size = 14),
-#     plot.margin = margin(60, 20, 40, 20)
-#   )
-# 
-# ggsave("missing_values_plot_fixed.png", width = 12, height = 9)
+```{r}
+ggplot(columns_with_missing, aes(x = reorder(Variable, -Missing_Count), y = Missing_Count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  coord_flip() +
+  labs(title = "Missing Values per Column (Filtered)", x = "Columns", y = "Count of Missing Values") +
+  theme_minimal()
 ```
-This graph complements the previous graphic as it shows the columns with 
-missing values. The one difference is this one shows the missing values per 
-column as a percentage of total rows. It reveals that only two columns have a 
-significant amount of missing values. Those two columns are the the Mortgage_Status_By_Median_Value and the "Median_Contract_Rent". Overall, this 
-shows that the data set is highly reliable and has minimal data loss.
+  This bar chart shows the count of missing values for the columns that have 
+data missing. It is able to show that the mssing values are concentrated
+into these few variables but 
+Mortgage_Status_By_Median_Value(Median_value_for_units_with_a_mortgage) has the
+most at 10 missing. The overall low missing values shows that the data quality
+is very high and there really is no need to inpute or remove. 
+
+```{r}
+missing_percentage <- data_with_missing %>%
+  summarise_all(~ mean(is.na(.)) * 100) %>%
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Percentage_Missing")
+
+# Bar plot for missing percentage
+ggplot(missing_percentage, aes(x = reorder(Variable, -Percentage_Missing), y = Percentage_Missing)) +
+  geom_bar(stat = "identity", fill = "tomato") +
+  coord_flip() +
+  labs(title = "Percentage of Missing Values per Column", x = "Columns", y = "Percentage Missing") +
+  theme_minimal()
+```
+This graph shows how missing data is very minimal for all the columns that
+include missing values. The highest missing percentage is less than 0.3% this 
+shows how reliable and unnecessary imputation of extra cleaning is.

@@ -1,1 +1,131 @@
 # Results
+```{r}
+library(tidyverse) 
+library(naniar) 
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(reshape2)
+input <- "data.csv"
+data <- read.csv(input)
+```
+
+1. Proportion of occupied vs vacant housing units across counties.
+```{r}
+occupancy_data <- data.frame(
+  Category = c("Occupied Housing Units", "Vacant Housing Units"),
+  Values = c(
+    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
+    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
+  )
+) %>%
+  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
+
+# Enhanced plot
+ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Percentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            size = 5, color = "white") + # Add percentage labels
+  theme_minimal(base_size = 16) +
+  labs(title = "Occupied vs Vacant Housing Units", fill
+       = "Housing Type") +
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank(), 
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+
+2. 
+```{r}
+state_occupancy_data <- state_occupancy_data %>%
+  mutate(Region = case_when(
+    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
+                      "New Jersey", "New York", "Pennsylvania") ~ "Northeast",
+    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", "Minnesota", "Missouri", "Nebraska",
+                      "North Dakota", "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
+    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", "Kentucky", "Louisiana", 
+                      "Maryland", "Mississippi", "North Carolina", "Oklahoma", "South Carolina", "Tennessee",
+                      "Texas", "Virginia", "West Virginia") ~ "South",
+    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", "Idaho", "Montana", "Nevada", 
+                      "New Mexico", "Oregon", "Utah", "Washington", "Wyoming") ~ "West"
+  ))
+
+ggplot(state_occupancy_data, aes(x = Region, y = Units, fill = Status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~Status, ncol = 1, scales = "free_y") +
+  theme_minimal(base_size = 14) +
+  labs(title = "Distribution of Housing by Region and Occupancy Status",
+       x = "Region", y = "Number of Units") +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+```
+3. 
+```{r}
+structure_data <- data %>%
+  summarise(
+    Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
+    Attached = sum(`Units_In_Structure.1unit_attached_structure.`, na.rm = TRUE),
+    `2-4 Units` = sum(`Units_In_Structure.2_to_4_units.`, na.rm = TRUE),
+    `5-19 Units` = sum(`Units_In_Structure.5_to_19_units.`, na.rm = TRUE),
+    `20+ Units` = sum(`Units_In_Structure.20_or_more_units.`, na.rm = TRUE),
+    Mobile = sum(`Units_In_Structure.Mobile_home_Boat_RV_van_et.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Structure_Type", values_to = "Units")
+
+# Plot
+ggplot(structure_data, aes(x = Structure_Type, y = Units, fill = Structure_Type)) +
+  geom_bar(stat = "identity") +
+  theme_minimal(base_size = 14) +
+  labs(title = "Housing Units by Structure Type", x = "Structure Type", y = "Number of Units") +
+  theme(legend.position = "none")
+
+```
+4. 
+```{r}
+year_built_data <- data %>%
+  summarise(
+    `Owner 2000+` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_2000_or_later.`, na.rm = TRUE),
+    `Owner 1980-1999` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1980_to_1999.`, na.rm = TRUE),
+    `Owner 1950-1979` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1950_to_1979.`, na.rm = TRUE),
+    `Owner <1949` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1949_or_earlier.`, na.rm = TRUE),
+    `Renter 2000+` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_2000_or_later.`, na.rm = TRUE),
+    `Renter 1980-1999` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1980_to_1999.`, na.rm = TRUE),
+    `Renter 1950-1979` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1950_to_1979.`, na.rm = TRUE),
+    `Renter <1949` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1949_or_earlier.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
+  separate(Category, into = c("Tenure", "Period"), sep = " ")
+
+# Plot
+ggplot(year_built_data, aes(x = Period, y = Units, group = Tenure, color = Tenure)) +
+  geom_line(size = 1.2) +
+  theme_minimal(base_size = 14) +
+  labs(title = "Housing Units Built Over Time by Ownership Type",
+       x = "Period", y = "Number of Units", color = "Tenure")
+
+```
+5. 
+```{r}
+bedroom_data <- data %>%
+  summarise(
+    `Owner No Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
+    `Owner 1 Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
+    `Owner 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
+    `Owner 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE),
+    `Renter No Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
+    `Renter 1 Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
+    `Renter 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
+    `Renter 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
+  separate(Category, into = c("Tenure", "Bedrooms"), sep = " ")
+
+# Plot
+ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
+  geom_bar(stat = "identity", position = "stack") +
+  theme_minimal(base_size = 14) +
+  labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
+
+```
+
