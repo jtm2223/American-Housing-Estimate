@@ -39,6 +39,15 @@ ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
 
 2. 
 ```{r}
+state_occupancy_data <- data %>%
+  group_by(STATE_NAME) %>%
+  summarise(
+    Total = sum(`Occupancy_Status.Total_Housing_units.`, na.rm = TRUE),
+    Occupied = sum(`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
+    Vacant = sum(`Occupancy_Status.Vacant.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = c("Total", "Occupied", "Vacant"), names_to = "Status", values_to = "Units")
+
 state_occupancy_data <- state_occupancy_data %>%
   mutate(Region = case_when(
     STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
@@ -248,6 +257,10 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
 
 10. 
 ```{r}
+library(dplyr)
+library(ggplot2)
+
+# Summarize structure types
 structure_types <- data %>%
   summarise(
     Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
