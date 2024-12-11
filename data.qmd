@@ -129,31 +129,29 @@ print(colnames(data))
 write.csv(data, "data.csv", row.names = FALSE)
 
 ```
+
 ## Creating data for d3Graph
 ```{r}
 library(jsonlite)
+
 state_data <- data |>
   group_by(STATE_NAME) |>
   summarise(
     state_median = median(Median_value_for_units_with_a_mortgage, na.rm = TRUE),
-    top_counties = list(
-      data |>
-        filter(STATE_NAME == first(STATE_NAME)) |>
-        arrange(desc(Median_value_for_units_with_a_mortgage)) |>
-        select(NAME, Median_value_for_units_with_a_mortgage) |>
-        head(5)
-    )
+    .groups = "drop"
   )
+
+top_counties_data <- data |>
+  group_by(STATE_NAME) |>
+  arrange(desc(Median_value_for_units_with_a_mortgage)) |>
+  slice_head(n = 5) |>
+  select(STATE_NAME, county = NAME, value = Median_value_for_units_with_a_mortgage) |>
+  nest(top_counties = c(county, value))
 
 state_json <- state_data |>
-  mutate(
-    top_counties = lapply(top_counties, function(counties) {
-      counties |> rename(county = NAME, 
-                         value = Median_value_for_units_with_a_mortgage)
-    })
-  )
+  left_join(top_counties_data, by = "STATE_NAME")
 
-write_json(state_data, "d3Data/d3Data.json", pretty = TRUE)
+write_json(state_json, "d3Data/d3Data.json", pretty = TRUE)
 ```
 
 ```{r}

@@ -28,4 +28,5 @@ format:
     theme: cosmo
     code-fold: true
 
-
+resources:
+  - d3Data/  # Ensures the folder is included in the build output
