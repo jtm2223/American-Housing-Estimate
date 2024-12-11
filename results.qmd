@@ -142,13 +142,13 @@ ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
 ```{r}
 # Filter data for valid, non-missing, and positive values
 filtered_data <- data %>%
-  filter(!is.na(Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage.) &
+  filter(!is.na(Median_value_for_units_with_a_mortgage) &
          !is.na(Contract_Rent.1000_to_1249.) &
-         Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage. > 0 &
+         Median_value_for_units_with_a_mortgage > 0 &
          Contract_Rent.1000_to_1249. > 0)
 
 # Scatter plot with regression line
-ggplot(filtered_data, aes(x = Mortgage_Status_By_Median_Value.Median_value_for_units_with_a_mortgage., 
+ggplot(filtered_data, aes(x = Median_value_for_units_with_a_mortgage, 
                           y = Contract_Rent.1000_to_1249.)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", color = "blue", se = FALSE) +

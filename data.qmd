@@ -22,8 +22,8 @@ library(dplyr)
 library(readxl)
 library(tidyverse)
 
-info_path = "DD_ACS_5-Year_Housing_Estimate_Data_by_County.xlsx"
-data_path = "ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
+info_path = "rawData/DD_ACS_5-Year_Housing_Estimate_Data_by_County.xlsx"
+data_path = "rawData/ACS_5YR_Housing_Estimate_Data_by_County_-8702403216850992228.csv"
 
 column_info <- read_excel(info_path)
 data <- read.csv(data_path)
@@ -59,8 +59,6 @@ table_name_mapping <- c(
   "B25041" = "Bedrooms",
   "B25042" = "Tenure_By_Bedrooms",
   "B25056" = "Contract_Rent",
-  "B25077" = "Median_Value",
-  "B25097" = "Mortgage_Status_By_Median_Value",
   "B25123" = "Tenure_By_Selected_Physical_And_Financial_Conditions"
 )
 
@@ -131,22 +129,49 @@ print(colnames(data))
 write.csv(data, "data.csv", row.names = FALSE)
 
 ```
+## Creating data for d3Graph
+```{r}
+library(jsonlite)
+state_data <- data |>
+  group_by(STATE_NAME) |>
+  summarise(
+    state_median = median(Median_value_for_units_with_a_mortgage, na.rm = TRUE),
+    top_counties = list(
+      data |>
+        filter(STATE_NAME == first(STATE_NAME)) |>
+        arrange(desc(Median_value_for_units_with_a_mortgage)) |>
+        select(NAME, Median_value_for_units_with_a_mortgage) |>
+        head(5)
+    )
+  )
+
+state_json <- state_data |>
+  mutate(
+    top_counties = lapply(top_counties, function(counties) {
+      counties |> rename(county = NAME, 
+                         value = Median_value_for_units_with_a_mortgage)
+    })
+  )
+
+write_json(state_data, "d3Data/d3Data.json", pretty = TRUE)
+```
 
 ```{r}
-missing_summary <- data %>%
-  summarise_all(~sum(is.na(.))) %>%
-  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Missing_Count") %>%
+missing_summary <- data |>
+  summarise_all(~sum(is.na(.))) |>
+  pivot_longer(cols = everything(), 
+               names_to = "Variable", 
+               values_to = "Missing_Count") |>
   arrange(desc(Missing_Count))
 
-data_with_missing <- data %>%
+data_with_missing <- data |>
   select(where(~ any(is.na(.))))
 
-columns_with_missing <- missing_summary %>%
+columns_with_missing <- missing_summary |>
   filter(Missing_Count > 0)
 
 # Print only columns with missing values
 print(columns_with_missing)
-
 ```
 ```{r}
 ggplot(columns_with_missing, aes(x = reorder(Variable, -Missing_Count), y = Missing_Count)) +
@@ -163,8 +188,8 @@ most at 10 missing. The overall low missing values shows that the data quality
 is very high and there really is no need to inpute or remove. 
 
 ```{r}
-missing_percentage <- data_with_missing %>%
-  summarise_all(~ mean(is.na(.)) * 100) %>%
+missing_percentage <- data_with_missing |>
+  summarise_all(~ mean(is.na(.)) * 100) |>
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Percentage_Missing")
 
 # Bar plot for missing percentage
