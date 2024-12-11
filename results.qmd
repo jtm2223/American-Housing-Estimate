@@ -10,34 +10,96 @@ input <- "data.csv"
 data <- read.csv(input)
 ```
 
-1. Proportion of occupied vs vacant housing units across counties.
+1.
 ```{r}
-occupancy_data <- data.frame(
-  Category = c("Occupied Housing Units", "Vacant Housing Units"),
-  Values = c(
-    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
-    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
-  )
-) %>%
-  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
+data$Median_value_for_units_with_a_mortgage <- as.numeric(data$Median_value_for_units_with_a_mortgage)
 
-# Enhanced plot
-ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
-  geom_bar(stat = "identity", width = 1, color = "white") +
-  coord_polar("y", start = 0) +
-  geom_text(aes(label = paste0(Percentage, "%")), 
-            position = position_stack(vjust = 0.5), 
-            size = 5, color = "white") + # Add percentage labels
-  theme_minimal(base_size = 16) +
-  labs(title = "Occupied vs Vacant Housing Units", fill
-       = "Housing Type") +
-  theme(axis.text = element_blank(), 
-        axis.title = element_blank(), 
-        panel.grid = element_blank(),
-        plot.title = element_text(hjust = 0.5, face = "bold"))
+# Group by state and calculate the mean (in case of duplicates)
+state_averages <- data %>%
+  group_by(STATE_NAME) %>%
+  summarise(Median_value_for_units_with_a_mortgage = mean(Median_value_for_units_with_a_mortgage, na.rm = TRUE))
+
+# Sort the data and extract the top 10 and bottom 10
+top_10_states <- state_averages %>%
+  arrange(desc(Median_value_for_units_with_a_mortgage)) %>%
+  slice_head(n = 10)
+
+bottom_10_states <- state_averages %>%
+  arrange(Median_value_for_units_with_a_mortgage) %>%
+  slice_head(n = 10)
+
+# Combine the top 10 and bottom 10
+combined_states <- bind_rows(top_10_states, bottom_10_states)
+
+# Order the combined states for proper visualization
+combined_states <- combined_states %>%
+  arrange(desc(Median_value_for_units_with_a_mortgage)) %>%
+  mutate(STATE_NAME = factor(STATE_NAME, levels = STATE_NAME))
+
+ggplot(combined_states, aes(
+  x = STATE_NAME, 
+  y = Median_value_for_units_with_a_mortgage, 
+  fill = Median_value_for_units_with_a_mortgage
+)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(
+    title = "Top 10 and Bottom 10 States: Median Housing Values for Units With Mortgages",
+    x = "State",
+    y = "Median Housing Value"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 12, hjust = 0.5), # Reduced title font size
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12)
+  )
 ```
 
+
 2. 
+```{r}
+state_occupancy_data <- data %>%
+  mutate(Region = case_when(
+    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
+                      "New Jersey", "New York", "Pennsylvania") ~ "Northeast",
+    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", "Minnesota", "Missouri", "Nebraska",
+                      "North Dakota", "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
+    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", "Kentucky", "Louisiana", 
+                      "Maryland", "Mississippi", "North Carolina", "Oklahoma", "South Carolina", "Tennessee",
+                      "Texas", "Virginia", "West Virginia") ~ "South",
+    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", "Idaho", "Montana", "Nevada", 
+                      "New Mexico", "Oregon", "Utah", "Washington", "Wyoming") ~ "West"
+  ))
+
+# Calculate median housing values for each region
+region_medians <- state_occupancy_data %>%
+  group_by(Region) %>%
+  summarise(Median_value = mean(Median_value_for_units_with_a_mortgage, na.rm = TRUE)) %>%
+  arrange(desc(Median_value))
+
+ggplot(state_occupancy_data, aes(
+  x = Region,
+  y = Median_value_for_units_with_a_mortgage,
+  fill = Region
+)) +
+  geom_boxplot(show.legend = FALSE) +
+  labs(
+    title = "Distribution of Median Housing Values by Region",
+    x = "Region",
+    y = "Median Housing Value"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 12, hjust = 0.5),
+    axis.text.x = element_text(size = 12),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12)
+  )
+```
+
+
+3. 
 ```{r}
 state_occupancy_data <- data %>%
   group_by(STATE_NAME) %>%
@@ -62,34 +124,19 @@ state_occupancy_data <- state_occupancy_data %>%
   ))
 
 ggplot(state_occupancy_data, aes(x = Region, y = Units, fill = Status)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  facet_wrap(~Status, ncol = 1, scales = "free_y") +
+  geom_bar(stat = "identity", position = "stack") +
   theme_minimal(base_size = 14) +
-  labs(title = "Distribution of Housing by Region and Occupancy Status",
-       x = "Region", y = "Number of Units") +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
-```
-3. 
-```{r}
-structure_data <- data %>%
-  summarise(
-    Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
-    Attached = sum(`Units_In_Structure.1unit_attached_structure.`, na.rm = TRUE),
-    `2-4 Units` = sum(`Units_In_Structure.2_to_4_units.`, na.rm = TRUE),
-    `5-19 Units` = sum(`Units_In_Structure.5_to_19_units.`, na.rm = TRUE),
-    `20+ Units` = sum(`Units_In_Structure.20_or_more_units.`, na.rm = TRUE),
-    Mobile = sum(`Units_In_Structure.Mobile_home_Boat_RV_van_et.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = everything(), names_to = "Structure_Type", values_to = "Units")
-
-# Plot
-ggplot(structure_data, aes(x = Structure_Type, y = Units, fill = Structure_Type)) +
-  geom_bar(stat = "identity") +
-  theme_minimal(base_size = 14) +
-  labs(title = "Housing Units by Structure Type", x = "Structure Type", y = "Number of Units") +
-  theme(legend.position = "none")
+  labs(
+    title = "Distribution of Housing Units by Region and Occupancy Status",
+    x = "Region",
+    y = "Number of Units",
+    fill = "Occupancy Status"
+  ) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+        plot.title = element_text(size = 12, hjust = 0.5))
 
 ```
+
 4. 
 ```{r}
 year_built_data <- data %>%
@@ -106,13 +153,31 @@ year_built_data <- data %>%
   pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
   separate(Category, into = c("Tenure", "Period"), sep = " ")
 
-# Plot
-ggplot(year_built_data, aes(x = Period, y = Units, group = Tenure, color = Tenure)) +
+ggplot(year_built_data, aes(
+  x = Period, 
+  y = Units, 
+  group = Tenure, 
+  color = Tenure
+)) +
   geom_line(size = 1.2) +
+  geom_point(size = 3) + # Add markers for data points
+  geom_text(aes(label = scales::comma(Units)), vjust = -0.5, size = 3, show.legend = FALSE) + # Add data labels
+  labs(
+    title = "Housing Units Built Over Time by Ownership Type",
+    subtitle = "Trends in owner-occupied and renter-occupied housing units across periods",
+    x = "Period",
+    y = "Number of Units",
+    color = "Tenure"
+  ) +
   theme_minimal(base_size = 14) +
-  labs(title = "Housing Units Built Over Time by Ownership Type",
-       x = "Period", y = "Number of Units", color = "Tenure")
-
+  theme(
+    plot.title = element_text(size = 14, hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12)
+  )
 ```
 5. 
 ```{r}
@@ -139,25 +204,32 @@ ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
 ```
 
 6. 
-```{r}
-# Filter data for valid, non-missing, and positive values
-filtered_data <- data %>%
-  filter(!is.na(Median_value_for_units_with_a_mortgage) &
-         !is.na(Contract_Rent.1000_to_1249.) &
-         Median_value_for_units_with_a_mortgage > 0 &
-         Contract_Rent.1000_to_1249. > 0)
 
-# Scatter plot with regression line
-ggplot(filtered_data, aes(x = Median_value_for_units_with_a_mortgage, 
-                          y = Contract_Rent.1000_to_1249.)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+```{r}
+structure_data <- data %>%
+  summarise(
+    Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
+    Attached = sum(`Units_In_Structure.1unit_attached_structure.`, na.rm = TRUE),
+    `2-4 Units` = sum(`Units_In_Structure.2_to_4_units.`, na.rm = TRUE),
+    `5-19 Units` = sum(`Units_In_Structure.5_to_19_units.`, na.rm = TRUE),
+    `20+ Units` = sum(`Units_In_Structure.20_or_more_units.`, na.rm = TRUE),
+    Mobile = sum(`Units_In_Structure.Mobile_home_Boat_RV_van_et.`, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Structure_Type", values_to = "Units")
+
+structure_data <- structure_data %>%
+  mutate(Structure_Type = forcats::fct_reorder(Structure_Type, Units, .desc = TRUE))
+
+# Plot
+ggplot(structure_data, aes(x = Structure_Type, y = Units, fill = Structure_Type)) +
+  geom_bar(stat = "identity") +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Relationship Between Median Housing Value and Rent",
-    x = "Median Value for Units with Mortgage",
-    y = "Units with Rent $1000-$1249"
-  )
+    title = "Housing Units by Structure Type (Ordered by Frequency)",
+    x = "Structure Type",
+    y = "Number of Units"
+  ) +
+  theme(legend.position = "none")
 
 ```
 
@@ -169,24 +241,44 @@ heatmap_data <- data %>%
     One_Bedroom = sum(Bedrooms.1_bedroom., na.rm = TRUE),
     Two_Bedrooms = sum(Bedrooms.2_bedrooms., na.rm = TRUE),
     Three_Bedrooms = sum(Bedrooms.3_or_more_bedrooms., na.rm = TRUE),
-    Rent_500_to_599 = sum(Contract_Rent.500_to_599., na.rm = TRUE),
-    Rent_600_to_699 = sum(Contract_Rent.600_to_699., na.rm = TRUE)
+    Rent_500_599 = sum(Contract_Rent.500_to_599., na.rm = TRUE),
+    Rent_600_699 = sum(Contract_Rent.600_to_699., na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "Count") %>%
+  mutate(
+    Type = ifelse(grepl("Bedroom", Category), "Bedrooms", "Rent")
   )
 
-heatmap_data <- melt(heatmap_data)
+# Separate bedroom and rent data into meaningful groups for comparison
+heatmap_cross_tab <- data %>%
+  group_by(Bedroom_Count = case_when(
+    Bedrooms.No_bedroom. > 0 ~ "No Bedroom",
+    Bedrooms.1_bedroom. > 0 ~ "One Bedroom",
+    Bedrooms.2_bedrooms. > 0 ~ "Two Bedrooms",
+    Bedrooms.3_or_more_bedrooms. > 0 ~ "Three Bedrooms"
+  ),
+  Rent_Range = case_when(
+    Contract_Rent.500_to_599. > 0 ~ "$500-$599",
+    Contract_Rent.600_to_699. > 0 ~ "$600-$699"
+  )) %>%
+  summarise(Count = n(), .groups = "drop")
 
-heatmap_data$Category <- ifelse(grepl("Bedroom", heatmap_data$variable), "Bedroom", "Rent")
-
-# Faceted bar plot
-ggplot(heatmap_data, aes(x = variable, y = value, fill = Category)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~Category, scales = "free") +
-  labs(title = "Counts of Bedrooms and Rent Ranges",
-       x = "Variable",
-       y = "Count") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_brewer(palette = "Set2", name = "Category")
+# Create a heatmap for bedroom counts vs. rent ranges
+ggplot(heatmap_cross_tab, aes(x = Bedroom_Count, y = Rent_Range, fill = Count)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(
+    title = "Heatmap of Bedroom Counts vs Rent Ranges",
+    x = "Bedroom Count",
+    y = "Rent Range",
+    fill = "Count"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 14, hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 12)
+  )
 ```
 
 8. 
@@ -256,35 +348,31 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
 ```
 
 10. 
+
 ```{r}
-library(dplyr)
-library(ggplot2)
-
-# Summarize structure types
-structure_types <- data %>%
-  summarise(
-    Detached = sum(`Units_In_Structure.1unit_detached_structure.`, na.rm = TRUE),
-    Attached = sum(`Units_In_Structure.1unit_attached_structure.`, na.rm = TRUE),
-    Two_to_Four_Units = sum(`Units_In_Structure.2_to_4_units.`, na.rm = TRUE),
-    Five_to_Nineteen_Units = sum(`Units_In_Structure.5_to_19_units.`, na.rm = TRUE),
-    Twenty_or_More_Units = sum(`Units_In_Structure.20_or_more_units.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = everything(), names_to = "Structure_Type", values_to = "Units")
-
-# Plot the proportions of units by structure type
-ggplot(structure_types, aes(x = Structure_Type, y = Units, fill = Structure_Type)) +
-  geom_bar(stat = "identity", alpha = 0.8) +
-  coord_flip() +
-  labs(
-    title = "Proportion of Housing Units by Structure Type",
-    x = "Structure Type",
-    y = "Number of Units"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(
-    axis.text.x = element_text(size = 12),
-    axis.text.y = element_text(size = 12),
-    plot.title = element_text(size = 16, face = "bold")
+occupancy_data <- data.frame(
+  Category = c("Occupied Housing Units", "Vacant Housing Units"),
+  Values = c(
+    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
+    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
   )
+) %>%
+  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
 
+# Enhanced plot
+ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Percentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            size = 5, color = "white") + # Add percentage labels
+  theme_minimal(base_size = 16) +
+  labs(title = "Occupied vs Vacant Housing Units", fill
+       = "Housing Type") +
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank(), 
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
+
+
