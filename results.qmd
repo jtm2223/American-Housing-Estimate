@@ -12,28 +12,26 @@ data <- read.csv(input)
 
 1.
 ```{r}
-data$Median_value_for_units_with_a_mortgage <- as.numeric(data$Median_value_for_units_with_a_mortgage)
+data$Median_value_for_units_with_a_mortgage <- 
+  as.numeric(data$Median_value_for_units_with_a_mortgage)
 
-# Group by state and calculate the mean (in case of duplicates)
-state_averages <- data %>%
-  group_by(STATE_NAME) %>%
-  summarise(Median_value_for_units_with_a_mortgage = mean(Median_value_for_units_with_a_mortgage, na.rm = TRUE))
+state_averages <- data |>
+  group_by(STATE_NAME) |>
+  summarise(Median_value_for_units_with_a_mortgage = 
+              mean(Median_value_for_units_with_a_mortgage, na.rm = TRUE))
 
-# Sort the data and extract the top 10 and bottom 10
-top_10_states <- state_averages %>%
-  arrange(desc(Median_value_for_units_with_a_mortgage)) %>%
+top_10_states <- state_averages |>
+  arrange(desc(Median_value_for_units_with_a_mortgage)) |>
   slice_head(n = 10)
 
-bottom_10_states <- state_averages %>%
-  arrange(Median_value_for_units_with_a_mortgage) %>%
+bottom_10_states <- state_averages |>
+  arrange(Median_value_for_units_with_a_mortgage) |>
   slice_head(n = 10)
 
-# Combine the top 10 and bottom 10
 combined_states <- bind_rows(top_10_states, bottom_10_states)
 
-# Order the combined states for proper visualization
-combined_states <- combined_states %>%
-  arrange(desc(Median_value_for_units_with_a_mortgage)) %>%
+combined_states <- combined_states |>
+  arrange(desc(Median_value_for_units_with_a_mortgage)) |>
   mutate(STATE_NAME = factor(STATE_NAME, levels = STATE_NAME))
 
 ggplot(combined_states, aes(
@@ -43,13 +41,13 @@ ggplot(combined_states, aes(
 )) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   labs(
-    title = "Top 10 and Bottom 10 States: Median Housing Values for Units With Mortgages",
-    x = "State",
+    title = "Top 10/Bottom 10 States: Median Housing Values for Units With Mortgages",
+    x = "State/District",
     y = "Median Housing Value"
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    plot.title = element_text(size = 12, hjust = 0.5), # Reduced title font size
+    plot.title = element_text(size = 12, hjust = 0.5, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12)
@@ -57,30 +55,39 @@ ggplot(combined_states, aes(
 ```
 This graph is showing the median housing trends for states and DC/Puerto Rico 
 across the country. The values/trends you can see here are distributed unevenly.
-This is becuase the coastal states or states with bigger urban areas have 
-higher prices and this can be seen becuase of higher deman and economic status
+This is because the coastal states or states with bigger urban areas have 
+higher prices and this can be seen because of higher demand and economic status
 compared to the rural states have lower values. 
 
 2. 
 ```{r}
-state_occupancy_data <- data %>%
+state_occupancy_data <- data |>
   mutate(Region = case_when(
-    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
-                      "New Jersey", "New York", "Pennsylvania") ~ "Northeast",
-    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", "Minnesota", "Missouri", "Nebraska",
-                      "North Dakota", "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
-    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", "Kentucky", "Louisiana", 
-                      "Maryland", "Mississippi", "North Carolina", "Oklahoma", "South Carolina", "Tennessee",
-                      "Texas", "Virginia", "West Virginia") ~ "South",
-    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", "Idaho", "Montana", "Nevada", 
-                      "New Mexico", "Oregon", "Utah", "Washington", "Wyoming") ~ "West"
+    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", 
+                      "Rhode Island", "Vermont", "New Jersey", "New York", 
+                      "Pennsylvania", "District of Columbia") ~ "Northeast",
+    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", 
+                      "Minnesota", "Missouri", "Nebraska", "North Dakota", 
+                      "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
+    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", 
+                      "Kentucky", "Louisiana", "Maryland", "Mississippi", 
+                      "North Carolina", "Oklahoma", "South Carolina", 
+                      "Tennessee","Texas", "Virginia", 
+                      "West Virginia") ~ "South",
+    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", 
+                      "Idaho", "Montana", "Nevada", "New Mexico", "Oregon", 
+                      "Utah", "Washington", "Wyoming") ~ "West",
+    STATE_NAME %in% c("Puerto Rico") ~ "Puerto Rico"
   ))
 
-# Calculate median housing values for each region
-region_medians <- state_occupancy_data %>%
-  group_by(Region) %>%
-  summarise(Median_value = mean(Median_value_for_units_with_a_mortgage, na.rm = TRUE)) %>%
+region_medians <- state_occupancy_data |>
+  group_by(Region) |>
+  summarise(Median_value = mean(Median_value_for_units_with_a_mortgage, 
+                                na.rm = TRUE)) |>
   arrange(desc(Median_value))
+
+state_occupancy_data <- state_occupancy_data |>
+  mutate(Region = factor(Region, levels = region_medians$Region))
 
 ggplot(state_occupancy_data, aes(
   x = Region,
@@ -95,43 +102,63 @@ ggplot(state_occupancy_data, aes(
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    plot.title = element_text(size = 12, hjust = 0.5),
+    plot.title = element_text(size = 12, hjust = 0.5, face = "bold"),
     axis.text.x = element_text(size = 12),
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12)
   )
 ```
-This graph shows the deistibution of median housing values per region. Going off 
+This graph shows the distribution of median housing values per region.Going off 
 of the last graph we wanted to see if it was a regional trend. It can be seen 
 that the northeast and the west are higher than the south and midwest. This goes
 with the same idea mentioned before that economically higher places that have 
-urban deman are these regions compared to rural having cheaper.
+urban demand are more expensive regions compared to more rural regions. As a
+note, we decided to include Washington D.C. in the northeast and include Puerto
+Rico by itself.
 
 3. 
 ```{r}
-state_occupancy_data <- data %>%
-  group_by(STATE_NAME) %>%
+state_occupancy_data <- data |>
+  group_by(STATE_NAME) |>
   summarise(
     Total = sum(`Occupancy_Status.Total_Housing_units.`, na.rm = TRUE),
     Occupied = sum(`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
     Vacant = sum(`Occupancy_Status.Vacant.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = c("Total", "Occupied", "Vacant"), names_to = "Status", values_to = "Units")
+  ) |>
+  pivot_longer(cols = c("Total", "Occupied", "Vacant"), 
+               names_to = "Status", 
+               values_to = "Units")
 
-state_occupancy_data <- state_occupancy_data %>%
+state_occupancy_data <- state_occupancy_data |>
   mutate(Region = case_when(
-    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
-                      "New Jersey", "New York", "Pennsylvania") ~ "Northeast",
-    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", "Minnesota", "Missouri", "Nebraska",
-                      "North Dakota", "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
-    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", "Kentucky", "Louisiana", 
-                      "Maryland", "Mississippi", "North Carolina", "Oklahoma", "South Carolina", "Tennessee",
-                      "Texas", "Virginia", "West Virginia") ~ "South",
-    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", "Idaho", "Montana", "Nevada", 
-                      "New Mexico", "Oregon", "Utah", "Washington", "Wyoming") ~ "West"
+    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", 
+                      "Rhode Island", "Vermont", "New Jersey", "New York", 
+                      "Pennsylvania", "District of Columbia") ~ "Northeast",
+    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", 
+                      "Minnesota", "Missouri", "Nebraska", "North Dakota", 
+                      "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
+    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", 
+                      "Kentucky", "Louisiana", "Maryland", "Mississippi", 
+                      "North Carolina", "Oklahoma", "South Carolina", 
+                      "Tennessee","Texas", "Virginia", 
+                      "West Virginia") ~ "South",
+    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", 
+                      "Idaho", "Montana", "Nevada", "New Mexico", "Oregon", 
+                      "Utah", "Washington", "Wyoming") ~ "West",
+    STATE_NAME %in% c("Puerto Rico") ~ "Puerto Rico"
   ))
 
-ggplot(state_occupancy_data, aes(x = Region, y = Units, fill = Status)) +
+region_totals <- state_occupancy_data |>
+  filter(Status == "Total") |>
+  group_by(Region) |>
+  summarise(Total_Units = sum(Units, na.rm = TRUE)) |>
+  arrange(desc(Total_Units))
+
+state_occupancy_data <- state_occupancy_data |>
+  mutate(Region = factor(Region, levels = region_totals$Region))
+
+ggplot(state_occupancy_data, aes(x = Region, 
+                                 y = Units, fill = Status)) +
   geom_bar(stat = "identity", position = "stack") +
   theme_minimal(base_size = 14) +
   labs(
@@ -141,92 +168,97 @@ ggplot(state_occupancy_data, aes(x = Region, y = Units, fill = Status)) +
     fill = "Occupancy Status"
   ) +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
-        plot.title = element_text(size = 12, hjust = 0.5))
-
+        plot.title = element_text(size = 12, hjust = 0.5, face = "bold"))
 ```
-This graph is explaing how different regions and their housing occupancy. The 
-south has the highest total than the others by alot and northeast is the least.
-The vacant is higher in rural and economically smaller areas while more dense
-places that econmically higher and higher demand have less vacant.
+This graph is explaining how different regions and their housing occupancy. We 
+chose to include Puerto Rico in its own group and Washington D.C. in the 
+Northeast like we did previously. The south has the highest total than the 
+others by a significant amount. Surprisingly the Northeast has the least amount 
+of units not including Puerto Rico by itself. This may be due to the overall 
+area of the northeast being smaller than the other regions, but it is still 
+surprising. The vacant is higher in rural and economically smaller areas while 
+more dense places that economically higher and higher demand have less vacant.
 
 4. 
 ```{r}
-year_built_data <- data %>%
+year_built_data <- data |>
   summarise(
     `Owner 2000+` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_2000_or_later.`, na.rm = TRUE),
     `Owner 1980-1999` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1980_to_1999.`, na.rm = TRUE),
     `Owner 1950-1979` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1950_to_1979.`, na.rm = TRUE),
-    `Owner <1949` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1949_or_earlier.`, na.rm = TRUE),
-    `Renter 2000+` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_2000_or_later.`, na.rm = TRUE),
-    `Renter 1980-1999` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1980_to_1999.`, na.rm = TRUE),
-    `Renter 1950-1979` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1950_to_1979.`, na.rm = TRUE),
-    `Renter <1949` = sum(`Renter_Tenure_By_Year_Structure_Built.Renter_occupied_housing_units_Built_1949_or_earlier.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
+    `Owner <1949` = sum(`Owner_Tenure_By_Year_Structure_Built.Owner_occupied_housing_units_Built_1949_or_earlier.`, na.rm = TRUE)
+  ) |>
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") |>
   separate(Category, into = c("Tenure", "Period"), sep = " ")
 
 ggplot(year_built_data, aes(
   x = Period, 
   y = Units, 
-  group = Tenure, 
-  color = Tenure
+  group = 1
 )) +
-  geom_line(size = 1.2) +
-  geom_point(size = 3) + # Add markers for data points
-  geom_text(aes(label = scales::comma(Units)), vjust = -0.5, size = 3, show.legend = FALSE) + # Add data labels
+  geom_line(size = 1.2, color = "orchid2") +
+  geom_point(size = 3, color = "orchid2") +
+  geom_text(aes(label = scales::comma(Units)), 
+            vjust = -0.5, size = 3, show.legend = FALSE) +
   labs(
-    title = "Housing Units Built Over Time by Ownership Type",
-    subtitle = "Trends in owner-occupied and renter-occupied housing units across periods",
+    title = "Housing Units Built Over Time",
+    subtitle = "Trends in owner-occupied housing units across periods",
     x = "Period",
-    y = "Number of Units",
-    color = "Tenure"
+    y = "Number of Units"
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    plot.title = element_text(size = 14, hjust = 0.5),
+    plot.title = element_text(size = 14, hjust = 0.5, face ="bold"),
     plot.subtitle = element_text(size = 12, hjust = 0.5),
     axis.text.x = element_text(size = 12),
     axis.text.y = element_text(size = 12),
     axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12)
+    axis.title.y = element_text(size = 12),
+    legend.position = "none"
   )
 ```
-In this graph the trend of when units were built over the countries history. It
-can be seen here that thoguhout owner units have alwasy been higher over time.
-Both follow a similar pattern where between 1950-1979 is where they both grow
-and peak. This can follow econmic trnads and how to country is growing. 
+In this graph the trend of when units were built over the countries history. 
+We wanted to observe this because we had seen all the reports about home 
+construction being down. From the graph we can now see that the number of 
+new houses being built has been consistently dropping since the baby boom. 
+This could be due to economic trends and how the country is growing.
 
 
 5. 
 ```{r}
-filtered_data <- data %>%
+filtered_data <- data |>
   filter(Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. >= 1990 & 
          Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. <= 2022)
 
-# Create the boxplot with smaller y-axis labels
-ggplot(filtered_data, aes(x = reorder(STATE_NAME, Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units., median),
-                          y = Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units.)) +
+ggplot(filtered_data, 
+       aes(x = reorder(STATE_NAME, Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units., 
+                       median),
+           y = Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units.)) +
   geom_boxplot(outlier.alpha = 0.3, fill = "skyblue", alpha = 0.6) +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Variance in Year Built for Units by State (1990+)",
+    title = "Variance in Year Built for Renter-Occupied Units by State (1990+)",
     x = "State (Ordered by Median Year Built)",
     y = "Year Built"
   ) +
   theme(
-    axis.text.y = element_text(size = 8, hjust = 0.5),  # Make y-axis labels smaller
+    plot.title = element_text(size = 11, hjust = 0.5, face = "bold"),
+    axis.text.y = element_text(size = 8, hjust = 0.5),
     axis.title.x = element_text(size = 12),
     axis.title.y = element_text(size = 12),
-    plot.margin = margin(20, 50, 20, 50)  # Add extra padding around the plot
+    plot.margin = margin(20, 50, 20, 50)
   ) +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +  # Add space above and below the boxplots
-  coord_flip()  # Flip coordinates for better readability
-
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
+  coord_flip()
 ```
-This graph was created to see going off the graph of years wheen houses were 
-built to investigate the diffference by state. We can see here that states in
-the south and west have newer houses due to growing population and development
-and midwest/northeast houses are on the older side.
+Continuing on the findings from the previous graph where we looked at 
+owner-occupied housing building trends we wanted to now look at the 
+renter-occupied build dates but by state. We can see here that states in the 
+south and west have newer houses due to growing population and development and 
+midwest/northeast houses are on the older side. We chose to show states whose 
+median year built was beyond 1990 and the graph shows how only a few states even
+have a median year built beyond 1990. This once again, reinforces the idea that
+house construction has been continously declining.
 
 6. 
 
@@ -237,10 +269,9 @@ occupancy_data <- data.frame(
     sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
     sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
   )
-) %>%
+) |>
   mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
 
-# Enhanced plot
 ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
   geom_bar(stat = "identity", width = 1, color = "white") +
   coord_polar("y", start = 0) +
@@ -258,8 +289,7 @@ ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
 This graph was created to go with the housing trend to see overall how the 
 distribution to occupied to vacant is. We can see here that the majority is 
 obviously occupied and this shoes the demand for housing across the country is
-strong but the vacancies might be is cerntain areas. 
-
+strong but the vacancies might be in specific areas. 
 
 7. 
 
@@ -288,51 +318,69 @@ ggplot(structure_data, aes(x = Structure_Type, y = Units, fill = Structure_Type)
     y = "Number of Units"
   ) +
   theme(legend.position = "none")
-
 ```
-This graph we wanted to see what kind of sturcture was being built as we explore
-more about housing types. We can see that detatched by far is dominated the
-market. This shows that people and families are prefering standalone homes in 
-all types of regions. 
+This graph we wanted to see what kind of structure was being built as we explore
+more about housing types. We can see that detached by far is dominated the
+market. This shows that people and families are preferring standalone homes in 
+all types of regions. From what we got gathered earlier though, most of these
+detached houses are very old houses.
 
 8. 
 ```{r}
-bedroom_data <- data %>%
+bedroom_data <- data |>
   summarise(
-    `Owner No Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
-    `Owner 1 Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
-    `Owner 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
-    `Owner 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE),
-    `Renter No Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
-    `Renter 1 Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
-    `Renter 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
-    `Renter 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
+    `Owner No Bedroom` = 
+      sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_No_bedroom.`, 
+          na.rm = TRUE),
+    `Owner 1 Bedroom` = 
+      sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_1_bedroom.`, 
+          na.rm = TRUE),
+    `Owner 2 Bedrooms` = 
+      sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_2_bedrooms.`, 
+          na.rm = TRUE),
+    `Owner 3+ Bedrooms` = 
+      sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_3_or_more_bedrooms.`, 
+          na.rm = TRUE),
+    `Renter No Bedroom` = 
+      sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_No_bedroom.`, 
+          na.rm = TRUE),
+    `Renter 1 Bedroom` = 
+      sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_1_bedroom.`, 
+          na.rm = TRUE),
+    `Renter 2 Bedrooms` = 
+      sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_2_bedrooms.`, 
+          na.rm = TRUE),
+    `Renter 3+ Bedrooms` = 
+      sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_3_or_more_bedrooms.`, 
+          na.rm = TRUE)
+  ) |>
+  pivot_longer(cols = everything(), 
+               names_to = "Category", 
+               values_to = "Units") |>
   separate(Category, into = c("Tenure", "Bedrooms"), sep = " ")
 
-# Plot
 ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
   geom_bar(stat = "identity", position = "stack") +
   theme_minimal(base_size = 14) +
-  labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
-
+  labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", 
+       y = "Number of Units", fill = "Tenure")
 ```
 This graph was to follow up on the last graph and wanted to see the size of the 
-houses that were built and if it had to do with the type of onwership. It can
+houses that were built and if it had to do with the type of ownership. It can
 be seen here that units with 3+ bedrooms are mostly owned instead of rented. The
-renters seem to prefer smaller palces like 1 or 2 bedrooms for affordinily and 
-tenant needs. 
+renters seem to prefer smaller places like 1 or 2 bedrooms for affordability and 
+tenant needs. This makes sense because people in need of more bedrooms typically
+tend to move into their own house rather than rent from someone else.
 
 9.
 ```{r}
 # Aggregate the data to show the distribution of rent ranges
-rent_distribution <- data %>%
+rent_distribution <- data |>
   pivot_longer(
     cols = starts_with("Contract_Rent"),
     names_to = "Rent_Range",
     values_to = "Count"
-  ) %>%
+  ) |>
   mutate(
     Rent_Range = case_when(
       str_detect(Rent_Range, "500_to_599") ~ "$500-$599",
@@ -346,10 +394,10 @@ rent_distribution <- data %>%
       str_detect(Rent_Range, "2000_or_more") ~ "$2000+",
       TRUE ~ NA_character_
     )
-  ) %>%
-  filter(!is.na(Rent_Range)) %>%  # Remove NA values
-  group_by(Rent_Range) %>%
-  summarise(Count = sum(Count, na.rm = TRUE), .groups = "drop") %>%
+  ) |>
+  filter(!is.na(Rent_Range)) |>
+  group_by(Rent_Range) |>
+  summarise(Count = sum(Count, na.rm = TRUE), .groups = "drop") |>
   mutate(Rent_Range = factor(Rent_Range, levels = c(
     "$500-$599", "$600-$699", "$700-$799", "$800-$899", "$900-$999", 
     "$1000-$1249", "$1250-$1499", "$1500-$1999", "$2000+"
@@ -359,53 +407,57 @@ rent_distribution <- data %>%
 ggplot(rent_distribution, aes(x = Rent_Range, y = Count, fill = Rent_Range)) +
   geom_bar(stat = "identity", show.legend = FALSE) +
   labs(
-    title = "Distribution of Rent Price Ranges",
+    title = "Distribution of Rent Prices Accross the US",
     x = "Rent Range",
     y = "Count"
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    plot.title = element_text(size = 14, hjust = 0.5),
+    plot.title = element_text(size = 14, hjust = 0.5, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text.y = element_text(size = 12)
   ) +
-  scale_fill_brewer(palette = "Set3")  # Change color scheme to Set3
-
-
+  scale_fill_brewer(palette = "Set3")
 ```
-This graph shows the differnt ranges of rent since we are curious how the price
+This graph shows the different ranges of rent since we are curious how the price
 varies throughout the country which is more prevalent. We can see here that
 1000-1249$ is the highest meaning the middle class is probably the most 
-common renters but the rest are pretty uniform.
+common renters but the rest are pretty uniform. However, we were surprised to
+see that the distribution of rent prices is fairly even.
 
 
 10. 
 ```{r}
-ownership_data_by_state <- data %>%
-  group_by(STATE_NAME) %>%
+ownership_data_by_state <- data |>
+  group_by(STATE_NAME) |>
   summarise(
-    Owner_Occupied = sum(`Tenure_By_Household_Size.Owner_Occupied.`, na.rm = TRUE),
-    Renter_Occupied = sum(`Tenure_By_Household_Size.Renter_Occupied.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = c(Owner_Occupied, Renter_Occupied), names_to = "Ownership", values_to = "Units")
+    Owner_Occupied = sum(`Tenure_By_Household_Size.Owner_Occupied.`, 
+                         na.rm = TRUE),
+    Renter_Occupied = sum(`Tenure_By_Household_Size.Renter_Occupied.`, 
+                          na.rm = TRUE)
+  ) |>
+  pivot_longer(cols = c(Owner_Occupied, Renter_Occupied), 
+               names_to = "Ownership", values_to = "Units")
 
-ownership_diff <- ownership_data_by_state %>%
-  pivot_wider(names_from = Ownership, values_from = Units) %>%
+ownership_diff <- ownership_data_by_state |>
+  pivot_wider(names_from = Ownership, values_from = Units) |>
   mutate(Difference = abs(Owner_Occupied - Renter_Occupied))
 
-# Filter to keep only top N states by difference
-top_states <- ownership_diff %>%
-  arrange(desc(Difference)) %>%
-  slice_head(n = 10)  # Adjust 'n' to the desired number of top states
+top_states <- ownership_diff |>
+  arrange(desc(Difference)) |>
+  slice_head(n = 10)
 
-# Plot the filtered data
-ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
+
+ggplot(top_states, aes(x = reorder(STATE_NAME, Difference))) +
   geom_point(aes(y = Owner_Occupied, color = "Owner Occupied"), size = 3) +
   geom_point(aes(y = Renter_Occupied, color = "Renter Occupied"), size = 3) +
-  geom_segment(aes(xend = STATE_NAME, y = Owner_Occupied, yend = Renter_Occupied), color = "gray") +
+  geom_segment(aes(xend = STATE_NAME, 
+                   y = Owner_Occupied, 
+                   yend = Renter_Occupied), 
+               color = "gray") +
   coord_flip() +
   labs(
-    title = "Top States with Highest Difference in Ownership vs Renting",
+    title = "Top 10 States with Highest Difference in Ownership vs Renting",
     x = "State",
     y = "Proportion of Units",
     color = "Ownership Type"
@@ -413,11 +465,12 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
   theme_minimal(base_size = 14) +
   theme(
     axis.text.y = element_text(size = 10),
-    plot.title = element_text(size = 16, face = "bold")
+    plot.title = element_text(size = 12, face = "bold")
   )
-
 ```
-This graph was created to see whcih states within the coutnry had the higheest 
-disparity between owners and renter percentage. As we see here states like 
-Florida and Texas the difference is the biggest and is a buyer heavy market 
-maybe due to lower hosuing costs and better market. 
+This graph was created to see which 10 states within the country had the highest 
+disparity between owners and renter percentage. We ordered the ten states from 
+those with the highest differences between owners and renters to those with the 
+lowest. As we see here states like Florida and Texas the difference is the 
+biggest and is a buyer heavy market maybe due to lower housing costs and better 
+market.
