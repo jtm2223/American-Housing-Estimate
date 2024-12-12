@@ -1,7 +1,7 @@
 // add your JavaScript/D3 to this file
 Promise.all([
     d3.json("d3Data/US_States.json"), // GeoJSON for US states
-    d3.json("d3Data/d3data.json")       // processed data
+    d3.json("d3Data/d3Data.json")       // processed data
 ]).then(([geoData, stateData]) => {
     const stateMap = new Map(
       stateData.map(d => [d.STATE_NAME.toLowerCase().trim(), d])
