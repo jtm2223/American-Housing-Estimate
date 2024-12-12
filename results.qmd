@@ -55,7 +55,11 @@ ggplot(combined_states, aes(
     axis.title.y = element_text(size = 12)
   )
 ```
-
+This graph is showing the median housing trends for states and DC/Puerto Rico 
+across the country. The values/trends you can see here are distributed unevenly.
+This is becuase the coastal states or states with bigger urban areas have 
+higher prices and this can be seen becuase of higher deman and economic status
+compared to the rural states have lower values. 
 
 2. 
 ```{r}
@@ -97,7 +101,11 @@ ggplot(state_occupancy_data, aes(
     axis.title.y = element_text(size = 12)
   )
 ```
-
+This graph shows the deistibution of median housing values per region. Going off 
+of the last graph we wanted to see if it was a regional trend. It can be seen 
+that the northeast and the west are higher than the south and midwest. This goes
+with the same idea mentioned before that economically higher places that have 
+urban deman are these regions compared to rural having cheaper.
 
 3. 
 ```{r}
@@ -136,6 +144,10 @@ ggplot(state_occupancy_data, aes(x = Region, y = Units, fill = Status)) +
         plot.title = element_text(size = 12, hjust = 0.5))
 
 ```
+This graph is explaing how different regions and their housing occupancy. The 
+south has the highest total than the others by alot and northeast is the least.
+The vacant is higher in rural and economically smaller areas while more dense
+places that econmically higher and higher demand have less vacant.
 
 4. 
 ```{r}
@@ -179,31 +191,77 @@ ggplot(year_built_data, aes(
     axis.title.y = element_text(size = 12)
   )
 ```
+In this graph the trend of when units were built over the countries history. It
+can be seen here that thoguhout owner units have alwasy been higher over time.
+Both follow a similar pattern where between 1950-1979 is where they both grow
+and peak. This can follow econmic trnads and how to country is growing. 
+
+
 5. 
 ```{r}
-bedroom_data <- data %>%
-  summarise(
-    `Owner No Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
-    `Owner 1 Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
-    `Owner 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
-    `Owner 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE),
-    `Renter No Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
-    `Renter 1 Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
-    `Renter 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
-    `Renter 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE)
-  ) %>%
-  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
-  separate(Category, into = c("Tenure", "Bedrooms"), sep = " ")
+filtered_data <- data %>%
+  filter(Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. >= 1990 & 
+         Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. <= 2022)
 
-# Plot
-ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
-  geom_bar(stat = "identity", position = "stack") +
+# Create the boxplot with smaller y-axis labels
+ggplot(filtered_data, aes(x = reorder(STATE_NAME, Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units., median),
+                          y = Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units.)) +
+  geom_boxplot(outlier.alpha = 0.3, fill = "skyblue", alpha = 0.6) +
   theme_minimal(base_size = 14) +
-  labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
+  labs(
+    title = "Variance in Year Built for Units by State (1990+)",
+    x = "State (Ordered by Median Year Built)",
+    y = "Year Built"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 8, hjust = 0.5),  # Make y-axis labels smaller
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    plot.margin = margin(20, 50, 20, 50)  # Add extra padding around the plot
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +  # Add space above and below the boxplots
+  coord_flip()  # Flip coordinates for better readability
 
 ```
+This graph was created to see going off the graph of years wheen houses were 
+built to investigate the diffference by state. We can see here that states in
+the south and west have newer houses due to growing population and development
+and midwest/northeast houses are on the older side.
 
 6. 
+
+```{r}
+occupancy_data <- data.frame(
+  Category = c("Occupied Housing Units", "Vacant Housing Units"),
+  Values = c(
+    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
+    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
+  )
+) %>%
+  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
+
+# Enhanced plot
+ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Percentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            size = 5, color = "white") + # Add percentage labels
+  theme_minimal(base_size = 16) +
+  labs(title = "Occupied vs Vacant Housing Units", fill
+       = "Housing Type") +
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank(), 
+        panel.grid = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+```
+This graph was created to go with the housing trend to see overall how the 
+distribution to occupied to vacant is. We can see here that the majority is 
+obviously occupied and this shoes the demand for housing across the country is
+strong but the vacancies might be is cerntain areas. 
+
+
+7. 
 
 ```{r}
 structure_data <- data %>%
@@ -232,83 +290,96 @@ ggplot(structure_data, aes(x = Structure_Type, y = Units, fill = Structure_Type)
   theme(legend.position = "none")
 
 ```
+This graph we wanted to see what kind of sturcture was being built as we explore
+more about housing types. We can see that detatched by far is dominated the
+market. This shows that people and families are prefering standalone homes in 
+all types of regions. 
 
-7. 
+8. 
 ```{r}
-heatmap_data <- data %>%
+bedroom_data <- data %>%
   summarise(
-    No_Bedroom = sum(Bedrooms.No_bedroom., na.rm = TRUE),
-    One_Bedroom = sum(Bedrooms.1_bedroom., na.rm = TRUE),
-    Two_Bedrooms = sum(Bedrooms.2_bedrooms., na.rm = TRUE),
-    Three_Bedrooms = sum(Bedrooms.3_or_more_bedrooms., na.rm = TRUE),
-    Rent_500_599 = sum(Contract_Rent.500_to_599., na.rm = TRUE),
-    Rent_600_699 = sum(Contract_Rent.600_to_699., na.rm = TRUE)
+    `Owner No Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
+    `Owner 1 Bedroom` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
+    `Owner 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
+    `Owner 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Owner_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE),
+    `Renter No Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_No_bedroom.`, na.rm = TRUE),
+    `Renter 1 Bedroom` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_1_bedroom.`, na.rm = TRUE),
+    `Renter 2 Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_2_bedrooms.`, na.rm = TRUE),
+    `Renter 3+ Bedrooms` = sum(`Tenure_By_Bedrooms.Renter_occupied_housing_units_with_3_or_more_bedrooms.`, na.rm = TRUE)
   ) %>%
-  pivot_longer(cols = everything(), names_to = "Category", values_to = "Count") %>%
+  pivot_longer(cols = everything(), names_to = "Category", values_to = "Units") %>%
+  separate(Category, into = c("Tenure", "Bedrooms"), sep = " ")
+
+# Plot
+ggplot(bedroom_data, aes(x = Bedrooms, y = Units, fill = Tenure)) +
+  geom_bar(stat = "identity", position = "stack") +
+  theme_minimal(base_size = 14) +
+  labs(title = "Bedrooms Distribution by Tenure", x = "Number of Bedrooms", y = "Number of Units", fill = "Tenure")
+
+```
+This graph was to follow up on the last graph and wanted to see the size of the 
+houses that were built and if it had to do with the type of onwership. It can
+be seen here that units with 3+ bedrooms are mostly owned instead of rented. The
+renters seem to prefer smaller palces like 1 or 2 bedrooms for affordinily and 
+tenant needs. 
+
+9.
+```{r}
+# Aggregate the data to show the distribution of rent ranges
+rent_distribution <- data %>%
+  pivot_longer(
+    cols = starts_with("Contract_Rent"),
+    names_to = "Rent_Range",
+    values_to = "Count"
+  ) %>%
   mutate(
-    Type = ifelse(grepl("Bedroom", Category), "Bedrooms", "Rent")
-  )
+    Rent_Range = case_when(
+      str_detect(Rent_Range, "500_to_599") ~ "$500-$599",
+      str_detect(Rent_Range, "600_to_699") ~ "$600-$699",
+      str_detect(Rent_Range, "700_to_799") ~ "$700-$799",
+      str_detect(Rent_Range, "800_to_899") ~ "$800-$899",
+      str_detect(Rent_Range, "900_to_999") ~ "$900-$999",
+      str_detect(Rent_Range, "1000_to_1249") ~ "$1000-$1249",
+      str_detect(Rent_Range, "1250_to_1499") ~ "$1250-$1499",
+      str_detect(Rent_Range, "1500_to_1999") ~ "$1500-$1999",
+      str_detect(Rent_Range, "2000_or_more") ~ "$2000+",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(Rent_Range)) %>%  # Remove NA values
+  group_by(Rent_Range) %>%
+  summarise(Count = sum(Count, na.rm = TRUE), .groups = "drop") %>%
+  mutate(Rent_Range = factor(Rent_Range, levels = c(
+    "$500-$599", "$600-$699", "$700-$799", "$800-$899", "$900-$999", 
+    "$1000-$1249", "$1250-$1499", "$1500-$1999", "$2000+"
+  )))
 
-# Separate bedroom and rent data into meaningful groups for comparison
-heatmap_cross_tab <- data %>%
-  group_by(Bedroom_Count = case_when(
-    Bedrooms.No_bedroom. > 0 ~ "No Bedroom",
-    Bedrooms.1_bedroom. > 0 ~ "One Bedroom",
-    Bedrooms.2_bedrooms. > 0 ~ "Two Bedrooms",
-    Bedrooms.3_or_more_bedrooms. > 0 ~ "Three Bedrooms"
-  ),
-  Rent_Range = case_when(
-    Contract_Rent.500_to_599. > 0 ~ "$500-$599",
-    Contract_Rent.600_to_699. > 0 ~ "$600-$699"
-  )) %>%
-  summarise(Count = n(), .groups = "drop")
-
-# Create a heatmap for bedroom counts vs. rent ranges
-ggplot(heatmap_cross_tab, aes(x = Bedroom_Count, y = Rent_Range, fill = Count)) +
-  geom_tile(color = "white") +
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+# Create a bar chart showing the distribution of rent ranges
+ggplot(rent_distribution, aes(x = Rent_Range, y = Count, fill = Rent_Range)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
   labs(
-    title = "Heatmap of Bedroom Counts vs Rent Ranges",
-    x = "Bedroom Count",
-    y = "Rent Range",
-    fill = "Count"
+    title = "Distribution of Rent Price Ranges",
+    x = "Rent Range",
+    y = "Count"
   ) +
   theme_minimal(base_size = 14) +
   theme(
     plot.title = element_text(size = 14, hjust = 0.5),
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text.y = element_text(size = 12)
-  )
-```
-
-8. 
-```{r}
-filtered_data <- data %>%
-  filter(Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. >= 1990 & 
-         Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units. <= 2022)
-
-# Create the boxplot with smaller y-axis labels
-ggplot(filtered_data, aes(x = reorder(STATE_NAME, Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units., median),
-                          y = Median_Year_Structure_Built_By_Tenure.Median_Year_Structure_Built_for_Renter_Occupied_Units.)) +
-  geom_boxplot(outlier.alpha = 0.3, fill = "skyblue", alpha = 0.6) +
-  theme_minimal(base_size = 14) +
-  labs(
-    title = "Variance in Year Built for Units by State (1990+)",
-    x = "State (Ordered by Median Year Built)",
-    y = "Year Built"
   ) +
-  theme(
-    axis.text.y = element_text(size = 8, hjust = 0.5),  # Make y-axis labels smaller
-    axis.title.x = element_text(size = 12),
-    axis.title.y = element_text(size = 12),
-    plot.margin = margin(20, 50, 20, 50)  # Add extra padding around the plot
-  ) +
-  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +  # Add space above and below the boxplots
-  coord_flip()  # Flip coordinates for better readability
+  scale_fill_brewer(palette = "Set3")  # Change color scheme to Set3
+
 
 ```
+This graph shows the differnt ranges of rent since we are curious how the price
+varies throughout the country which is more prevalent. We can see here that
+1000-1249$ is the highest meaning the middle class is probably the most 
+common renters but the rest are pretty uniform.
 
-9. 
+
+10. 
 ```{r}
 ownership_data_by_state <- data %>%
   group_by(STATE_NAME) %>%
@@ -346,33 +417,7 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
   )
 
 ```
-
-10. 
-
-```{r}
-occupancy_data <- data.frame(
-  Category = c("Occupied Housing Units", "Vacant Housing Units"),
-  Values = c(
-    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
-    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
-  )
-) %>%
-  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
-
-# Enhanced plot
-ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
-  geom_bar(stat = "identity", width = 1, color = "white") +
-  coord_polar("y", start = 0) +
-  geom_text(aes(label = paste0(Percentage, "%")), 
-            position = position_stack(vjust = 0.5), 
-            size = 5, color = "white") + # Add percentage labels
-  theme_minimal(base_size = 16) +
-  labs(title = "Occupied vs Vacant Housing Units", fill
-       = "Housing Type") +
-  theme(axis.text = element_blank(), 
-        axis.title = element_blank(), 
-        panel.grid = element_blank(),
-        plot.title = element_text(hjust = 0.5, face = "bold"))
-```
-
-
+This graph was created to see whcih states within the coutnry had the higheest 
+disparity between owners and renter percentage. As we see here states like 
+Florida and Texas the difference is the biggest and is a buyer heavy market 
+maybe due to lower hosuing costs and better market. 
