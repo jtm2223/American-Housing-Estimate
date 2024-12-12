@@ -14,4 +14,4 @@ dynamically growing data set and more outside social economic data so that we
 are not just assuming from inference but actual data when creating these trends
 and explain them. Overall lessons learned and takeaways are that we were able 
 to gain meaningful analysis for combining cleaning techniques and different 
-visualizations techniques to get a better grip of out country and the housing.
+visualizations techniques to get a better grip of out country and the housing. 
