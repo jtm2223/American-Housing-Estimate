@@ -29,3 +29,4 @@ explaining trends that are found. Overall, we learned that we were able to gain
 meaningful analysis from combining cleaning techniques and different 
 visualizations techniques. More specifically, we learned about just how volatile 
 and complicated the housing market really is.
+ 

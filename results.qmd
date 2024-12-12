@@ -373,7 +373,7 @@ houses that were built and if it had to do with the type of ownership. It can
 be seen here that units with 3+ bedrooms are mostly owned instead of rented. The
 renters seem to prefer smaller places like 1 or 2 bedrooms for affordability and 
 tenant needs. This makes sense because people in need of more bedrooms typically
-tend to move into their own house rather than rent from someone else.
+tend to move into their own house rather than rent from someone else. 
 
 9.
 ```{r}

@@ -183,7 +183,7 @@ data missing. It is able to show that the mssing values are concentrated
 into these few variables but 
 Mortgage_Status_By_Median_Value(Median_value_for_units_with_a_mortgage) has the
 most at 10 missing. The overall low missing values shows that the data quality
-is very high and there really is no need to inpute or remove. 
+is very high and there really is no need to inpute or remove.  
 
 ```{r}
 missing_percentage <- data_with_missing |>
