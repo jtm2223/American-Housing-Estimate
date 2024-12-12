@@ -68,5 +68,15 @@
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
     ]
+  },
+  {
+    "objectID": "conclusion.html",
+    "href": "conclusion.html",
+    "title": "5  Conclusion",
+    "section": "",
+    "text": "Through the project the American housing data was explord more in depth to get a better grasp of where our nation has come from and is headed. This showed housing occupancy, vacancy rates and differences between physical and financial condition throughout all different diverse states and regions all over. Main patterns that were found include housing conditions, the difference between renting and owning a home in the US and different conditions that go with the disparity of owning and renting in this country. However this research was limited to only historical data and nothing updated in real time so it is hard to truly get the main recent changes in housing trends. Another issue was that some data lacked context and were not able to be utilized for deeper insights. Going forward or future research could include integrating more of a dynamically growing data set and more outside social economic data so that we are not just assuming from inference but actual data when creating these trends and explain them. Overall lessons learned and takeaways are that we were able to gain meaningful analysis for combining cleaning techniques and different visualizations techniques to get a better grip of out country and the housing.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Conclusion</span>"
+    ]
   }
 ]
