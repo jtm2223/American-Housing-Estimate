@@ -398,7 +398,7 @@ The following object is masked from 'package:tidyr':
 <span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    STATE_NAME <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Alabama"</span>, <span class="st">"Arkansas"</span>, <span class="st">"Delaware"</span>, <span class="st">"Florida"</span>, <span class="st">"Georgia"</span>, </span>
 <span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Kentucky"</span>, <span class="st">"Louisiana"</span>, <span class="st">"Maryland"</span>, <span class="st">"Mississippi"</span>, </span>
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"North Carolina"</span>, <span class="st">"Oklahoma"</span>, <span class="st">"South Carolina"</span>, </span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Tennessee"</span>,<span class="st">"Texas"</span>, <span class="st">"Virginia"</span>, </span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Tennessee"</span>, <span class="st">"Texas"</span>, <span class="st">"Virginia"</span>, </span>
 <span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"West Virginia"</span>) <span class="sc">~</span> <span class="st">"South"</span>,</span>
 <span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>    STATE_NAME <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Alaska"</span>, <span class="st">"Arizona"</span>, <span class="st">"California"</span>, <span class="st">"Colorado"</span>, <span class="st">"Hawaii"</span>, </span>
 <span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                      <span class="st">"Idaho"</span>, <span class="st">"Montana"</span>, <span class="st">"Nevada"</span>, <span class="st">"New Mexico"</span>, <span class="st">"Oregon"</span>, </span>
@@ -406,27 +406,30 @@ The following object is masked from 'package:tidyr':
 <span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    STATE_NAME <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Puerto Rico"</span>) <span class="sc">~</span> <span class="st">"Puerto Rico"</span></span>
 <span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  ))</span>
 <span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>region_totals <span class="ot">&lt;-</span> state_occupancy_data <span class="sc">|&gt;</span></span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Status <span class="sc">==</span> <span class="st">"Total"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Region) <span class="sc">|&gt;</span></span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Total_Units =</span> <span class="fu">sum</span>(Units, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Total_Units))</span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>state_occupancy_data <span class="ot">&lt;-</span> state_occupancy_data <span class="sc">|&gt;</span></span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Region =</span> <span class="fu">factor</span>(Region, <span class="at">levels =</span> region_totals<span class="sc">$</span>Region))</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter out the "Total" category</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>state_occupancy_data <span class="ot">&lt;-</span> state_occupancy_data <span class="sc">|&gt;</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Status <span class="sc">!=</span> <span class="st">"Total"</span>)</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>region_totals <span class="ot">&lt;-</span> state_occupancy_data <span class="sc">|&gt;</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Region) <span class="sc">|&gt;</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Total_Units =</span> <span class="fu">sum</span>(Units, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Total_Units))</span>
 <span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(state_occupancy_data, <span class="fu">aes</span>(<span class="at">x =</span> Region, </span>
-<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">y =</span> Units, <span class="at">fill =</span> Status)) <span class="sc">+</span></span>
-<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
-<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
-<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Housing Units by Region and Occupancy Status"</span>,</span>
-<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Region"</span>,</span>
-<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of Units"</span>,</span>
-<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Occupancy Status"</span></span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a>state_occupancy_data <span class="ot">&lt;-</span> state_occupancy_data <span class="sc">|&gt;</span></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Region =</span> <span class="fu">factor</span>(Region, <span class="at">levels =</span> region_totals<span class="sc">$</span>Region))</span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(state_occupancy_data, <span class="fu">aes</span>(<span class="at">x =</span> Region, </span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">y =</span> Units, <span class="at">fill =</span> Status)) <span class="sc">+</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) <span class="sc">+</span></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Distribution of Housing Units by Region and Occupancy Status"</span>,</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Region"</span>,</span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Number of Units"</span>,</span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Occupancy Status"</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">0</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>),</span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>, <span class="at">hjust =</span> <span class="fl">0.5</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -751,11 +754,11 @@ The following object is masked from 'package:tidyr':
 <span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Difference =</span> <span class="fu">abs</span>(Owner_Occupied <span class="sc">-</span> Renter_Occupied))</span>
 <span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>top_states <span class="ot">&lt;-</span> ownership_diff <span class="sc">|&gt;</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(Difference)) <span class="sc">|&gt;</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Difference) <span class="sc">|&gt;</span></span>
 <span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>)</span>
 <span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(top_states, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(STATE_NAME, Difference))) <span class="sc">+</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(top_states, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(STATE_NAME, <span class="sc">-</span>Difference))) <span class="sc">+</span></span>
 <span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> Owner_Occupied, <span class="at">color =</span> <span class="st">"Owner Occupied"</span>), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> Renter_Occupied, <span class="at">color =</span> <span class="st">"Renter Occupied"</span>), <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">xend =</span> STATE_NAME, </span>
@@ -764,7 +767,7 @@ The following object is masked from 'package:tidyr':
 <span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span></span>
 <span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
 <span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Top 10 States with Highest Difference in Ownership vs Renting"</span>,</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Top 10 States with Smallest Difference in Ownership vs Renting"</span>,</span>
 <span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"State"</span>,</span>
 <span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proportion of Units"</span>,</span>
 <span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Ownership Type"</span></span>
@@ -783,7 +786,7 @@ The following object is masked from 'package:tidyr':
 </div>
 </div>
 </div>
-<p>This graph was created to see which 10 states within the country had the highest disparity between owners and renter percentage. We ordered the ten states from those with the highest differences between owners and renters to those with the lowest. As we see here states like Florida and Texas the difference is the biggest and is a buyer heavy market maybe due to lower housing costs and better market.</p>
+<p>This graph was created to see which 10 states within the country had the smallest disparity between owners and renter percentage. We ordered the ten states from those with the lowest differences between owners and renters to those with the highest. A huge surprise from this is that in Washington D.C. there are actually more people renting a place than owning a place.</p>
 
 
 

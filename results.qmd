@@ -140,7 +140,7 @@ state_occupancy_data <- state_occupancy_data |>
     STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", 
                       "Kentucky", "Louisiana", "Maryland", "Mississippi", 
                       "North Carolina", "Oklahoma", "South Carolina", 
-                      "Tennessee","Texas", "Virginia", 
+                      "Tennessee", "Texas", "Virginia", 
                       "West Virginia") ~ "South",
     STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", 
                       "Idaho", "Montana", "Nevada", "New Mexico", "Oregon", 
@@ -148,8 +148,11 @@ state_occupancy_data <- state_occupancy_data |>
     STATE_NAME %in% c("Puerto Rico") ~ "Puerto Rico"
   ))
 
+# Filter out the "Total" category
+state_occupancy_data <- state_occupancy_data |>
+  filter(Status != "Total")
+
 region_totals <- state_occupancy_data |>
-  filter(Status == "Total") |>
   group_by(Region) |>
   summarise(Total_Units = sum(Units, na.rm = TRUE)) |>
   arrange(desc(Total_Units))
@@ -444,11 +447,11 @@ ownership_diff <- ownership_data_by_state |>
   mutate(Difference = abs(Owner_Occupied - Renter_Occupied))
 
 top_states <- ownership_diff |>
-  arrange(desc(Difference)) |>
+  arrange(Difference) |>
   slice_head(n = 10)
 
 
-ggplot(top_states, aes(x = reorder(STATE_NAME, Difference))) +
+ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
   geom_point(aes(y = Owner_Occupied, color = "Owner Occupied"), size = 3) +
   geom_point(aes(y = Renter_Occupied, color = "Renter Occupied"), size = 3) +
   geom_segment(aes(xend = STATE_NAME, 
@@ -457,7 +460,7 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, Difference))) +
                color = "gray") +
   coord_flip() +
   labs(
-    title = "Top 10 States with Highest Difference in Ownership vs Renting",
+    title = "Top 10 States with Smallest Difference in Ownership vs Renting",
     x = "State",
     y = "Proportion of Units",
     color = "Ownership Type"
@@ -468,9 +471,8 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, Difference))) +
     plot.title = element_text(size = 12, face = "bold")
   )
 ```
-This graph was created to see which 10 states within the country had the highest 
-disparity between owners and renter percentage. We ordered the ten states from 
-those with the highest differences between owners and renters to those with the 
-lowest. As we see here states like Florida and Texas the difference is the 
-biggest and is a buyer heavy market maybe due to lower housing costs and better 
-market.
+This graph was created to see which 10 states within the country had the 
+smallest disparity between owners and renter percentage. We ordered the ten 
+states from  those with the lowest differences between owners and renters to 
+those with the highest. A huge surprise from this is that in Washington D.C.
+there are actually more people renting a place than owning a place.

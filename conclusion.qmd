@@ -1,17 +1,31 @@
 # Conclusion
-Through the project the American housing data was explored more in depth to get
-a better grasp of where our nation has come from and is headed. This showed 
-housing occupancy, vacancy rates and differences between physical and
-financial condition throughout all different diverse states and regions all 
-over. Main patterns that were found include housing conditions, the difference 
-between renting and owning a home in the US and conditions that go with that 
-change of housing type. However this research was limited to only historical 
-data and nothing updated in real time so it is hard to truly get the main 
-recent changes in housing trends. Another issue was that some data lacked 
-context and were not able to be utilized for deeper insights. Going forward for 
-future research we could include integrating more of a dynamically growing data 
-set and more outside social economic data. This is so we are not just assuming 
-from inference but actual data when explaining trends that are found. Overall 
-lessons learned and takeaways are that we were able to gain meaningful analysis 
-from combining cleaning techniques and different visualizations techniques 
-to get a better grip of our country and the housing. 
+Through the project, we explored the American housing data in depth to get
+a better grasp of the housing market. Our goal was to discover some trends or 
+ideas that we previously did not know as both of us begin to move into the point 
+of our lives where we look for our own places. Through our analysis we did 
+manage to discover new ones while also discovering some we didn't know. For 
+example, we discovered how the data supported the idea that fewer houses were 
+being built. In addition, we found data that supported the trend of
+fewer houses being built. Another surprising thing we found was that the
+Washington D.C. actually had more units that were being rented than there are
+units where the owner lives in it. This analysis we found especially surprising
+as we did not see the states with big cities show up on the list. Our analysis
+also led us to prove ideas we had already such as the fact that the northeast
+and west were more expensive housing markets or that there were many more 
+single houses than other forms of houses like town homes or apartments. While
+creating the interactive graph we discovered how important big cities were in
+the overall median unit value in a state and also were reaffirmed on which
+states had the highest median unit value. However, though we discovered all of 
+this, the applicability may not be the best as the data was gathered from 
+2016-2020. Though this data is fairly recent, with major events like the 
+pandemic, a lot has changed, especially in the housing market. For example, 
+since 2023, there has actually been an uptick in new houses being built 
+which was not what our graph showed. Another issue was that some of the columns 
+in the data lacked clear context and were not able to be utilized for deeper 
+insights. Going forward for future research we could include integrating more 
+of a dynamically growing data set and more outside social economic data. 
+This is so we are not just assuming from inference but actual data when 
+explaining trends that are found. Overall, we learned that we were able to gain 
+meaningful analysis from combining cleaning techniques and different 
+visualizations techniques. More specifically, we learned about just how volatile 
+and complicated the housing market really is.
