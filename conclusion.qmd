@@ -22,11 +22,13 @@ pandemic, a lot has changed, especially in the housing market. For example,
 since 2023, there has actually been an uptick in new houses being built 
 which was not what our graph showed. Another issue was that some of the columns 
 in the data lacked clear context and were not able to be utilized for deeper 
-insights. Going forward for future research we could include integrating more 
-of a dynamically growing data set and more outside social economic data. 
-This is so we are not just assuming from inference but actual data when 
-explaining trends that are found. Overall, we learned that we were able to gain 
-meaningful analysis from combining cleaning techniques and different 
-visualizations techniques. More specifically, we learned about just how volatile 
-and complicated the housing market really is.
+insights. In addition, due to the set up and structure of the data we could not 
+explore certain things we wanted to like rent distribution based on number of 
+bedrooms and more. Going forward for future research we could include 
+integrating more of a dynamically growing data set and more outside social 
+economic data. This is so we are not just assuming from inference but actual 
+data when explaining trends that are found. Overall, we learned that we were 
+able to gain meaningful analysis from combining cleaning techniques and 
+different visualizations techniques. More specifically, we learned about just 
+how volatile and complicated the housing market really is.
  
