@@ -57,7 +57,7 @@ This graph is showing the median housing trends for states and DC/Puerto Rico
 across the country. The values/trends you can see here are distributed unevenly.
 This is because the coastal states or states with bigger urban areas have 
 higher prices and this can be seen because of higher demand and economic status
-compared to the rural states have lower values. 
+compared to the rural states have lower values.
 
 2. 
 ```{r}
@@ -180,7 +180,8 @@ others by a significant amount. Surprisingly the Northeast has the least amount
 of units not including Puerto Rico by itself. This may be due to the overall 
 area of the northeast being smaller than the other regions, but it is still 
 surprising. The vacant is higher in rural and economically smaller areas while 
-more dense places that economically higher and higher demand have less vacant.
+more dense places that economically higher and higher demand have less vacant
+units.
 
 4. 
 ```{r}
@@ -263,39 +264,7 @@ median year built was beyond 1990 and the graph shows how only a few states even
 have a median year built beyond 1990. This once again, reinforces the idea that
 house construction has been continously declining.
 
-6. 
-
-```{r}
-occupancy_data <- data.frame(
-  Category = c("Occupied Housing Units", "Vacant Housing Units"),
-  Values = c(
-    sum(data$`Occupancy_Status.Occupied_housing_units.`, na.rm = TRUE),
-    sum(data$`Occupancy_Status.Vacant.`, na.rm = TRUE)
-  )
-) |>
-  mutate(Percentage = round(Values / sum(Values) * 100, 1)) 
-
-ggplot(occupancy_data, aes(x = "", y = Values, fill = Category)) +
-  geom_bar(stat = "identity", width = 1, color = "white") +
-  coord_polar("y", start = 0) +
-  geom_text(aes(label = paste0(Percentage, "%")), 
-            position = position_stack(vjust = 0.5), 
-            size = 5, color = "white") + # Add percentage labels
-  theme_minimal(base_size = 16) +
-  labs(title = "Occupied vs Vacant Housing Units", fill
-       = "Housing Type") +
-  theme(axis.text = element_blank(), 
-        axis.title = element_blank(), 
-        panel.grid = element_blank(),
-        plot.title = element_text(hjust = 0.5, face = "bold"))
-```
-This graph was created to go with the housing trend to see overall how the 
-distribution to occupied to vacant is. We can see here that the majority is 
-obviously occupied and this shoes the demand for housing across the country is
-strong but the vacancies might be in specific areas. 
-
-7. 
-
+6.
 ```{r}
 structure_data <- data %>%
   summarise(
@@ -328,7 +297,7 @@ market. This shows that people and families are preferring standalone homes in
 all types of regions. From what we got gathered earlier though, most of these
 detached houses are very old houses.
 
-8. 
+7.
 ```{r}
 bedroom_data <- data |>
   summarise(
@@ -375,7 +344,7 @@ renters seem to prefer smaller places like 1 or 2 bedrooms for affordability and
 tenant needs. This makes sense because people in need of more bedrooms typically
 tend to move into their own house rather than rent from someone else. 
 
-9.
+8.
 ```{r}
 # Aggregate the data to show the distribution of rent ranges
 rent_distribution <- data |>
@@ -419,8 +388,7 @@ ggplot(rent_distribution, aes(x = Rent_Range, y = Count, fill = Rent_Range)) +
     plot.title = element_text(size = 14, hjust = 0.5, face = "bold"),
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text.y = element_text(size = 12)
-  ) +
-  scale_fill_brewer(palette = "Set3")
+  )
 ```
 This graph shows the different ranges of rent since we are curious how the price
 varies throughout the country which is more prevalent. We can see here that
@@ -428,6 +396,87 @@ varies throughout the country which is more prevalent. We can see here that
 common renters but the rest are pretty uniform. However, we were surprised to
 see that the distribution of rent prices is fairly even.
 
+9.
+```{r}
+rent_data <- data |>
+  mutate(Region = case_when(
+    STATE_NAME %in% c("Connecticut", "Maine", "Massachusetts", "New Hampshire", 
+                      "Rhode Island", "Vermont", "New Jersey", "New York", 
+                      "Pennsylvania", "District of Columbia") ~ "Northeast",
+    STATE_NAME %in% c("Illinois", "Indiana", "Iowa", "Kansas", "Michigan", 
+                      "Minnesota", "Missouri", "Nebraska", "North Dakota", 
+                      "Ohio", "South Dakota", "Wisconsin") ~ "Midwest",
+    STATE_NAME %in% c("Alabama", "Arkansas", "Delaware", "Florida", "Georgia", 
+                      "Kentucky", "Louisiana", "Maryland", "Mississippi", 
+                      "North Carolina", "Oklahoma", "South Carolina", 
+                      "Tennessee","Texas", "Virginia", 
+                      "West Virginia") ~ "South",
+    STATE_NAME %in% c("Alaska", "Arizona", "California", "Colorado", "Hawaii", 
+                      "Idaho", "Montana", "Nevada", "New Mexico", "Oregon", 
+                      "Utah", "Washington", "Wyoming") ~ "West",
+    STATE_NAME %in% c("Puerto Rico") ~ "Puerto Rico"
+  ))
+
+rent_distribution <- rent_data |>
+  pivot_longer(
+    cols = starts_with("Contract_Rent"),
+    names_to = "Rent_Range",
+    values_to = "Count"
+  ) |>
+  mutate(
+    Rent_Range = case_when(
+      str_detect(Rent_Range, "500_to_599") ~ "$500-$599",
+      str_detect(Rent_Range, "600_to_699") ~ "$600-$699",
+      str_detect(Rent_Range, "700_to_799") ~ "$700-$799",
+      str_detect(Rent_Range, "800_to_899") ~ "$800-$899",
+      str_detect(Rent_Range, "900_to_999") ~ "$900-$999",
+      str_detect(Rent_Range, "1000_to_1249") ~ "$1000-$1249",
+      str_detect(Rent_Range, "1250_to_1499") ~ "$1250-$1499",
+      str_detect(Rent_Range, "1500_to_1999") ~ "$1500-$1999",
+      str_detect(Rent_Range, "2000_or_more") ~ "$2000+",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(Rent_Range)) |>
+  group_by(Region, Rent_Range) |>
+  summarise(Count = sum(Count, na.rm = TRUE), .groups = "drop") |>
+  mutate(Rent_Range = factor(
+    Rent_Range, 
+    levels = c("$500-$599", "$600-$699", "$700-$799", "$800-$899", "$900-$999", 
+               "$1000-$1249", "$1250-$1499", "$1500-$1999", "$2000+")
+  ))
+
+rent_distribution_filtered <- rent_distribution |>
+  filter(Region != "Puerto Rico")
+
+ggplot(rent_distribution_filtered, aes(x = Rent_Range, y = Count, 
+                                       fill = Rent_Range)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  facet_wrap(~ Region, scales = "free_y") +
+  labs(
+    title = "Distribution of Rent Prices by Region",
+    x = "Rent Range",
+    y = "Count"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 14, hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    axis.title.x = element_text(size = 12),
+    axis.title.y = element_text(size = 12),
+    strip.text = element_text(size = 12)
+  ) +
+  scale_y_continuous(labels = scales::comma)
+```
+Continuing from the previous graph we then wanted to observe how the rent
+prices changed per region as we had observed the median house prices per region
+earlier. As expected, we saw a similar trend as when we did the median unit
+prices per region where the West and Northeast regions were the most expensive. 
+In addition, this trend makes sense as most of the major cities in the US are in 
+the West and Northwest regions and these cities typically have the most 
+expensive costs of living. Also, from the graph we see that the rent range $1000
+- $1249 seems to be the most common one. Unlike previous graphs faceted on 
+region, we chose not to include Puerto Rico in this one at all.
 
 10. 
 ```{r}
@@ -471,8 +520,13 @@ ggplot(top_states, aes(x = reorder(STATE_NAME, -Difference))) +
     plot.title = element_text(size = 12, face = "bold")
   )
 ```
-This graph was created to see which 10 states within the country had the 
-smallest disparity between owners and renter percentage. We ordered the ten 
-states from  those with the lowest differences between owners and renters to 
-those with the highest. A huge surprise from this is that in Washington D.C.
-there are actually more people renting a place than owning a place.
+Lastly, we created this graph was created to see which 10 states within the 
+country had the smallest disparity between owners and renter percentage. We 
+ordered the ten states from  those with the lowest differences between owners 
+and renters to those with the highest. A huge surprise from this is that in 
+Washington D.C. there are actually more people renting a place than owning a 
+place. We assumed that the states with more major cities would have smaller
+disparities between owner occupied and renter occupied because people in cities
+typically rent. However, we were surprised to see that many smaller states such
+as Wyoming, Rhode Island, and Wyoming were among the ones with the smallest
+difference.

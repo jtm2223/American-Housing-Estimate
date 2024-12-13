@@ -145,7 +145,9 @@ top_counties_data <- data |>
   group_by(STATE_NAME) |>
   arrange(desc(Median_value_for_units_with_a_mortgage)) |>
   slice_head(n = 5) |>
-  select(STATE_NAME, county = NAME, value = Median_value_for_units_with_a_mortgage) |>
+  select(STATE_NAME, 
+         county = NAME, 
+         value = Median_value_for_units_with_a_mortgage) |>
   nest(top_counties = c(county, value))
 
 state_json <- state_data |>
@@ -166,16 +168,19 @@ data_with_missing <- data |>
   select(where(~ any(is.na(.))))
 
 columns_with_missing <- missing_summary |>
-  filter(Missing_Count > 0)
+  filter(Missing_Count > 0) |>
+  mutate(Variable = gsub("^.*\\((.*)\\).*", "\\1", Variable))
 
-# Print only columns with missing values
 print(columns_with_missing)
+
 ```
 ```{r}
-ggplot(columns_with_missing, aes(x = reorder(Variable, -Missing_Count), y = Missing_Count)) +
+ggplot(columns_with_missing, aes(x = reorder(Variable, -Missing_Count), 
+                                 y = Missing_Count)) +
   geom_bar(stat = "identity", fill = "skyblue") +
   coord_flip() +
-  labs(title = "Missing Values per Column (Filtered)", x = "Columns", y = "Count of Missing Values") +
+  labs(title = "Missing Values per Column (Filtered)", x = "Columns", 
+       y = "Count of Missing Values") +
   theme_minimal()
 ```
   This bar chart shows the count of missing values for the columns that have 
@@ -188,13 +193,18 @@ is very high and there really is no need to inpute or remove.
 ```{r}
 missing_percentage <- data_with_missing |>
   summarise_all(~ mean(is.na(.)) * 100) |>
-  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Percentage_Missing")
+  pivot_longer(cols = everything(), 
+               names_to = "Variable", 
+               values_to = "Percentage_Missing") |>
+  mutate(Variable = gsub("^.*\\((.*)\\).*", "\\1", Variable))
 
-# Bar plot for missing percentage
-ggplot(missing_percentage, aes(x = reorder(Variable, -Percentage_Missing), y = Percentage_Missing)) +
+ggplot(missing_percentage, aes(x = reorder(Variable, -Percentage_Missing), 
+                               y = Percentage_Missing)) +
   geom_bar(stat = "identity", fill = "tomato") +
   coord_flip() +
-  labs(title = "Percentage of Missing Values per Column", x = "Columns", y = "Percentage Missing") +
+  labs(title = "Percentage of Missing Values per Column", 
+       x = "Columns", 
+       y = "Percentage Missing") +
   theme_minimal()
 ```
 This graph shows how missing data is very minimal for all the columns that

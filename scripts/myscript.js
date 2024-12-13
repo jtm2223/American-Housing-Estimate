@@ -21,21 +21,19 @@ Promise.all([
       .attr("width", 800)
       .attr("height", 500);
 
-    // Add the title
     svg.append("text")
         .attr("x", 400)
         .attr("y", 15)
         .attr("text-anchor", "middle")
-        .attr("font-size", "20px")
+        .attr("font-size", "21px")
         .attr("font-weight", "bold")
         .text("Median Housing Values for Units With Mortgages by State");
     
-    // Add the subtitle
     svg.append("text")
         .attr("x", 400)
         .attr("y", 35)
         .attr("text-anchor", "middle")
-        .attr("font-size", "14px")
+        .attr("font-size", "15px")
         .attr("font-style", "italic")
         .attr("fill", "gray")
         .text("(Hover over the state to see the counties with the most expensive units)");
@@ -67,7 +65,6 @@ Promise.all([
         })
         .on("mouseout", () => d3.select("#tooltip").style("display", "none"));
         
-        // Add tooltip container
     d3.select("body").append("div")
     .attr("id", "tooltip")
     .style("position", "absolute")
@@ -117,7 +114,7 @@ Promise.all([
         .range([20, legendWidth + 20]);
     
     const legendAxis = d3.axisBottom(legendAxisScale)
-        .ticks(5, "$.0f");
+        .ticks(5);
     
     legendSvg.append("g")
         .attr("class", "legend-axis")
